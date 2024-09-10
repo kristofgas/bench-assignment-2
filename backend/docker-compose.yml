@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "MyStr0ngPassword!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+  web:
+    build:
+      context: .
+      dockerfile: Web/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=myDataBase;User Id=sa;Password=MyStr0ngPassword!;TrustServerCertificate=true;
+    depends_on:
+      - db
+
+volumes:
+  sqlserverdata:

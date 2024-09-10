@@ -1,0 +1,62 @@
+name: Build and patch tag for container images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      # - staging
+
+#If you are changing env, it needs to reflect environemnt in patch-image-tag
+env:
+  argo_env: ${{ github.ref == 'refs/heads/main' && 'test' || github.ref_name }}   
+          
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ACR build backend image
+        id: acr
+        uses: azure/acr-build@v1
+        with:
+          service_principal: ${{ secrets.Azure_Service_Principal }}
+          service_principal_password: ${{ secrets.Azure_Service_Principal_Password }}
+          tenant: ${{ secrets.Azure_Tenant }}
+          registry: ${{ secrets.Azure_ACR_Registry }}
+          repository: ${{env.argo_env}}
+          image: be
+          git_access_token: ${{ secrets.ITM_CPH_INTERNAL_GITOPS_READONLY_TOKEN }}
+          folder: ./backend
+          dockerfile: ./Web/Dockerfile
+          branch: ${{ github.ref_name }}
+          tag: ${{ github.event.pull_request.head.sha || github.sha }}
+          
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ACR build frontend image
+        id: acr
+        uses: azure/acr-build@v1
+        with:
+          service_principal: ${{ secrets.Azure_Service_Principal }}
+          service_principal_password: ${{ secrets.Azure_Service_Principal_Password }}
+          tenant: ${{ secrets.Azure_Tenant }}
+          registry: ${{ secrets.Azure_ACR_Registry }}
+          repository: ${{env.argo_env}}
+          image: fe
+          git_access_token: ${{ secrets.ITM_CPH_INTERNAL_GITOPS_READONLY_TOKEN }}
+          folder: ./frontend
+          dockerfile: ./Dockerfile
+          branch: ${{ github.ref_name }}
+          tag: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  patch-image-tag:
+    needs: [build-backend, build-frontend]
+    name: Patch ${{ github.ref == 'refs/heads/main' && 'test' || github.ref_name }}
+    uses: it-minds/itm_cph_internal_gitops/.github/workflows/patchimagetag.yaml@main
+    with:
+      environment: ${{ github.ref == 'refs/heads/main' && 'test' || github.ref_name }}
+      application: ${{ vars.Argo_Application }}
+      tag: ${{ github.event.pull_request.head.sha || github.sha }}
+    secrets:
+      ITM_CPH_INTERNAL_GITOPS_TOKEN: ${{ secrets.ITM_CPH_INTERNAL_GITOPS_TOKEN }}

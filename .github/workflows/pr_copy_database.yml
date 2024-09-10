@@ -1,0 +1,25 @@
+name: PR copy database
+concurrency: database_copy
+
+on:
+    pull_request:
+      types: [opened, reopened]
+      branches:
+        - main
+jobs:
+
+  copy-pr-database:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: '{"clientId":"${{ secrets.Azure_Service_Principal }}","clientSecret":"${{ secrets.Azure_Service_Principal_Password }}","subscriptionId":"${{ secrets.Azure_Subscription }}","tenantId":"${{ secrets.Azure_Tenant }}"}'
+
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az sql db copy -g ${{ secrets.Azure_Database_Resource_Group }} -s ${{ secrets.Azure_Database_Server }} -n ${{ secrets.Azure_Database_Name }} --dest-name pr-${{ github.event.pull_request.number }}-${{ secrets.Azure_Database_Name }} --service-objective S0 --no-wait

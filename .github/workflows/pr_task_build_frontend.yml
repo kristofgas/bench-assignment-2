@@ -1,0 +1,45 @@
+name: Build frontend
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - frontend/**
+    branches:
+      - feature/**
+
+jobs:
+  crlf-check:
+    name: Check CRLF
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository contents
+        uses: actions/checkout@v4
+
+      - name: Use action to check for CRLF endings
+        uses: erclu/check-crlf@v1.2.0
+        with:
+          path: ./frontend
+
+  build-and-test-frontend:
+    runs-on: ubuntu-latest
+    env:
+      node-version: 18.x
+      working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3.2.0
+        with:
+          node-version: ${{ env.node-version }}
+
+      - run: npm ci
+        working-directory: ${{ env.working-directory }}
+
+      - run: npm run build
+        working-directory: ${{ env.working-directory }}

@@ -1,0 +1,58 @@
+{
+  "folders": [
+    {
+      "path": "frontend"
+    },
+    {
+      "path": "backend"
+    },
+    {
+      "path": "docs"
+    }
+  ],
+  "settings": {
+    "plantuml.server": "https://www.plantuml.com/plantuml",
+
+    "files.eol": "\n",
+    "files.autoSave": "onFocusChange",
+    "files.insertFinalNewline": true,
+    
+    "editor.snippetSuggestions": "bottom",
+    "editor.tabSize": 2,
+    "editor.acceptSuggestionOnEnter": "smart",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.colorDecorators": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+
+    "eslint.enable": true,
+
+    "material-icon-theme.folders.theme": "specific",
+    "material-icon-theme.activeIconPack": "react",
+    
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[csharp]": {
+      "editor.formatOnType": true,
+      "editor.wordWrap": "wordWrapColumn",
+      "editor.wordWrapColumn": 120
+    }
+  },
+  "extensions": {
+    "recommendations": ["esbenp.prettier-vscode", "streetsidesoftware.code-spell-checker", "ms-dotnettools.csharp"]
+  }
+}

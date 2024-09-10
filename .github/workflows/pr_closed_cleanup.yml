@@ -1,0 +1,38 @@
+name: PR delete cloned database
+
+on:
+    pull_request:
+      types: [closed]
+      branches:
+        - main
+
+jobs:
+  delete-pr-database:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: '{"clientId":"${{ secrets.Azure_Service_Principal }}","clientSecret":"${{ secrets.Azure_Service_Principal_Password }}","subscriptionId":"${{ secrets.Azure_Subscription }}","tenantId":"${{ secrets.Azure_Tenant }}"}'
+
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az sql db delete -g ${{ secrets.Azure_Database_Resource_Group }} -s ${{ secrets.Azure_Database_Server }} -n pr-${{ github.event.pull_request.number }}-${{ secrets.Azure_Database_Name }} -y
+  delete-pr-images:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: '{"clientId":"${{ secrets.Azure_Service_Principal }}","clientSecret":"${{ secrets.Azure_Service_Principal_Password }}","subscriptionId":"${{ secrets.Azure_Subscription }}","tenantId":"${{ secrets.Azure_Tenant }}"}'
+
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az acr repository delete -n ${{ secrets.Azure_ACR_Registry }} --repository pr-${{ github.event.pull_request.number }}/be --yes
+          az acr repository delete -n ${{ secrets.Azure_ACR_Registry }} --repository pr-${{ github.event.pull_request.number }}/fe --yes
