@@ -10,7 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System.Reflection;
 using System.Reflection.Emit;
 using Task = Domain.Entities.Task;
-
+using Domain.Common;
+using System;
 
 namespace Infrastructure.Persistence
 {
@@ -18,11 +19,15 @@ namespace Infrastructure.Persistence
     {
         private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
         private readonly IEncryptionService _encryptionService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IDateTime _dateTime;
 
-        public ApplicationDbContext(DbContextOptions options, AuditableEntitySaveChangesInterceptor auditableEntitySaveChangesInterceptor, IEncryptionService encryptionService) : base(options)
+        public ApplicationDbContext(DbContextOptions options, AuditableEntitySaveChangesInterceptor auditableEntitySaveChangesInterceptor, IEncryptionService encryptionService, ICurrentUserService currentUserService, IDateTime dateTime) : base(options)
         {
             _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
             _encryptionService = encryptionService;
+            _currentUserService = currentUserService;
+            _dateTime = dateTime;
         }
 
         public IDbContextTransaction BeginTransaction()
@@ -32,15 +37,29 @@ namespace Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            foreach (var entry in ChangeTracker.Entries<BaseAuditableEntity>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedBy = _currentUserService.UserId;
+                        entry.Entity.Created = _dateTime.Now;
+                        break;
+                    case EntityState.Modified:
+                        entry.Entity.LastModifiedBy = _currentUserService.UserId;
+                        entry.Entity.LastModified = _dateTime.Now;
+                        break;
+                }
+            }
+
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-   
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-    builder.UseEncryption(_encryptionService);
+            builder.UseEncryption(_encryptionService);
 
             builder.Entity<Role>(entity =>
             {
@@ -53,15 +72,15 @@ namespace Infrastructure.Persistence
             builder.Entity<UserRole>()
         .HasKey(ur => new { ur.UserId, ur.RoleId });
 
-    builder.Entity<UserRole>()
-        .HasOne(ur => ur.User)
-        .WithMany(u => u.UserRoles)
-        .HasForeignKey(ur => ur.UserId);
+            builder.Entity<UserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
 
-    builder.Entity<UserRole>()
-        .HasOne(ur => ur.Role)
-        .WithMany(r => r.UserRoles)
-        .HasForeignKey(ur => ur.RoleId);
+            builder.Entity<UserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId);
 
             builder.Entity<UserTaskList>()
     .HasKey(utl => new { utl.UserId, utl.TaskListId });

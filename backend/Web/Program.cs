@@ -12,7 +12,9 @@ using Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Application.Common.Interfaces;
+using Infrastructure.Services;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,10 @@ try
 
     // Add this line after AddAuthentication
     builder.Services.AddAuthorization();
+
+    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+    builder.Services.AddTransient<IDateTime, DateTimeService>();
+    builder.Services.AddHttpContextAccessor();
 
     ApplicationServiceConfiguration.ConfigureServices(builder.Services);
     InfrastructureServiceConfiguration.ConfigureServices(builder.Services, builder.Configuration, builder.Environment);
