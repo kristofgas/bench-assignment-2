@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Application.Common.Interfaces;
+using Application.TaskLists.Commands.ShareTaskList;
+using Application.Common.Exceptions;
+using Application.Tasks.Commands.UpdateTaskDetails;
 
 namespace Web.Controllers
 {
@@ -37,6 +40,13 @@ namespace Web.Controllers
             return await Mediator.Send(command);
         }
 
+        [HttpPost("lists/{id}/share")]
+        public async Task<ActionResult> ShareTaskList(int id, [FromBody] List<int> userIdsToShare)
+        {
+            await Mediator.Send(new ShareTaskListCommand { TaskListId = id, UserIdsToShare = userIdsToShare });
+            return NoContent();
+        }
+
         [HttpPost("tasks")]
         public async Task<ActionResult<TaskDto>> CreateTask(CreateTaskCommand command)
         {
@@ -59,7 +69,19 @@ namespace Web.Controllers
                 return BadRequest();
             }
 
-            await Mediator.Send(command);
+            try
+            {
+                await Mediator.Send(command);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ForbiddenAccessException)
+            {
+                return Forbid();
+            }
+
             return NoContent();
         }
 
@@ -80,6 +102,30 @@ namespace Web.Controllers
         public async Task<ActionResult<List<TaskDto>>> GetTasksByState([FromQuery] GetTasksByStateQuery query)
         {
             return await Mediator.Send(query);
+        }
+
+        [HttpPut("{id}/details")]
+        public async Task<ActionResult> UpdateTaskDetails(int id, UpdateTaskDetailsCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                await Mediator.Send(command);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ForbiddenAccessException)
+            {
+                return Forbid();
+            }
+
+            return NoContent();
         }
     }
 }

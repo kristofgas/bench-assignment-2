@@ -24,6 +24,8 @@ namespace Application.Common.Interfaces
         DbSet<Role> Roles { get; set; }
         DbSet<UserRole> UserRoles { get; set; }
 
+        DbSet<UserTaskList> UserTaskLists { get; set; }
+
         //DbSet<IdentityUserRole<int>> UserRoles { get; set; }
         //DbSet<IdentityRole<int>> Roles { get; set; }
 

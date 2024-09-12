@@ -44,7 +44,7 @@ namespace Application.Users.Commands.RegisterUser
 
             _context.Users.Add(user);
 
-            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleEnum.Admin, cancellationToken);
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleEnum.User, cancellationToken);
             if (defaultRole != null)
             {
                 _context.UserRoles.Add(new UserRole { User = user, Role = defaultRole });

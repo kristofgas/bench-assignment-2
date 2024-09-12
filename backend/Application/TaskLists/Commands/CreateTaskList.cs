@@ -34,14 +34,17 @@ namespace Application.TaskLists.Commands.CreateTaskList
                 throw new NotFoundException(nameof(User), request.UserId);
             }
 
-            var entity = new Domain.Entities.TaskList
+            var entity = new TaskList
             {
                 Name = request.Name,
                 Description = request.Description,
-                UserId = request.UserId
             };
 
             _context.TaskLists.Add(entity);
+
+            var userTaskList = new UserTaskList { UserId = request.UserId, TaskList = entity };
+            _context.UserTaskLists.Add(userTaskList);
+
             await _context.SaveChangesAsync(cancellationToken);
 
             return new TaskListDto
@@ -49,7 +52,7 @@ namespace Application.TaskLists.Commands.CreateTaskList
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
-                UserId = entity.UserId
+                UserIds = new List<int> { request.UserId }
             };
         }
     }

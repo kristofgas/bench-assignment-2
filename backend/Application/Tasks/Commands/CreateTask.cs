@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Tasks.Dto;
 using MediatR;
 using Application.Common.Security.Attributes;
+using Microsoft.EntityFrameworkCore;
 
 
 
@@ -14,7 +15,12 @@ namespace Application.Tasks.Commands.CreateTask
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public int TaskListId { get; set; }
-        public int UserId { get; set; } // Ensure UserId is included
+        public int UserId { get; set; }
+        public int Rank { get; set; } = 1; // Default to "Standard"
+        public string Color { get; set; } = "Default";
+        public bool IsFavorite { get; set; } = false;
+
+
     }
 
     public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskDto>
@@ -28,16 +34,18 @@ namespace Application.Tasks.Commands.CreateTask
 
         public async Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
-            var taskList = await _context.TaskLists.FindAsync(request.TaskListId);
+            var taskList = await _context.TaskLists
+                .Include(tl => tl.UserTaskLists)
+                .FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, cancellationToken);
+
             if (taskList == null)
             {
                 throw new NotFoundException(nameof(Domain.Entities.TaskList), request.TaskListId);
             }
 
-            var user = await _context.Users.FindAsync(request.UserId);
-            if (user == null)
+            if (!taskList.UserTaskLists.Any(utl => utl.UserId == request.UserId))
             {
-                throw new NotFoundException(nameof(Domain.Entities.User), request.UserId);
+                throw new ForbiddenAccessException();
             }
 
             var entity = new Domain.Entities.Task
@@ -45,7 +53,10 @@ namespace Application.Tasks.Commands.CreateTask
                 Title = request.Title,
                 Description = request.Description,
                 TaskListId = request.TaskListId,
-                UserId = request.UserId // Ensure UserId is assigned
+                UserId = request.UserId,
+                Rank = request.Rank,
+                Color = request.Color,
+                IsFavorite = request.IsFavorite
             };
 
             _context.Tasks.Add(entity);
@@ -58,7 +69,10 @@ namespace Application.Tasks.Commands.CreateTask
                 Description = entity.Description,
                 IsCompleted = entity.IsCompleted,
                 TaskListId = entity.TaskListId,
-                UserId = entity.UserId // Ensure UserId is returned
+                UserIds = taskList.UserTaskLists.Select(utl => utl.UserId).ToList(),
+                Rank = entity.Rank,
+                Color = entity.Color,
+                IsFavorite = entity.IsFavorite
             };
         }
     }

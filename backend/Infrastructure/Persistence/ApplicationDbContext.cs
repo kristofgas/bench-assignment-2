@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Reflection;
+using System.Reflection.Emit;
 using Task = Domain.Entities.Task;
 
 
@@ -62,7 +63,20 @@ namespace Infrastructure.Persistence
         .WithMany(r => r.UserRoles)
         .HasForeignKey(ur => ur.RoleId);
 
-    base.OnModelCreating(builder);
+            builder.Entity<UserTaskList>()
+    .HasKey(utl => new { utl.UserId, utl.TaskListId });
+
+            builder.Entity<UserTaskList>()
+                .HasOne(utl => utl.User)
+                .WithMany(u => u.UserTaskLists)
+                .HasForeignKey(utl => utl.UserId);
+
+            builder.Entity<UserTaskList>()
+                .HasOne(utl => utl.TaskList)
+                .WithMany(tl => tl.UserTaskLists)
+                .HasForeignKey(utl => utl.TaskListId);
+
+            base.OnModelCreating(builder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -81,9 +95,11 @@ namespace Infrastructure.Persistence
 
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+
+        public DbSet<UserTaskList> UserTaskLists { get; set; }
         //public DbSet<IdentityUserRole<int>> UserRoles { get; set; }
         //public DbSet<IdentityRole<int>> Roles { get; set; }
-     public async System.Threading.Tasks.Task SeedRolesAsync()
+        public async System.Threading.Tasks.Task SeedRolesAsync()
         {
             if (!await Roles.AnyAsync())
             {

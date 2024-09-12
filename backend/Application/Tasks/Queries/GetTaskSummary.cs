@@ -15,15 +15,20 @@ namespace Application.Tasks.Queries.GetTaskSummary
     public class GetTaskSummaryQueryHandler : IRequestHandler<GetTaskSummaryQuery, TaskSummaryDto>
     {
         private readonly IApplicationDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetTaskSummaryQueryHandler(IApplicationDbContext context)
+        public GetTaskSummaryQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
         {
             _context = context;
+            _currentUserService = currentUserService;
         }
 
         public async Task<TaskSummaryDto> Handle(GetTaskSummaryQuery request, CancellationToken cancellationToken)
         {
+            var currentUserId = int.Parse(_currentUserService.UserId!);
+
             var summary = await _context.Tasks
+                .Where(t => t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
                 .GroupBy(t => 1)
                 .Select(g => new TaskSummaryDto
                 {

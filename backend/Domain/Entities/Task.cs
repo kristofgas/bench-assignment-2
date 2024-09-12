@@ -12,5 +12,8 @@ namespace Domain.Entities
         public TaskList TaskList { get; set; } = null!;
         public int UserId { get; set; }
         public User User { get; set; } = null!;
+        public int Rank { get; set; } = 1; 
+        public string Color { get; set; } = "Default"; 
+        public bool IsFavorite { get; set; } = false;
     }
 }

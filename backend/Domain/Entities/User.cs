@@ -10,6 +10,7 @@ namespace Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public ICollection<TaskList> TaskLists { get; set; } = new List<TaskList>();
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public ICollection<UserTaskList> UserTaskLists { get; set; } = new List<UserTaskList>();
 
     }
 }

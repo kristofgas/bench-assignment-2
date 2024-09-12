@@ -27,13 +27,16 @@ namespace Application.Users.Commands.DeleteUser
         {
             var user = await _context.Users
                 .Include(u => u.TaskLists)
-                .ThenInclude(tl => tl.Tasks)
+                    .ThenInclude(tl => tl.Tasks)
+                .Include(u => u.UserTaskLists)
                 .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
             if (user == null)
             {
                 throw new NotFoundException(nameof(User), request.UserId);
             }
+
+            _context.UserTaskLists.RemoveRange(user.UserTaskLists);
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync(cancellationToken);

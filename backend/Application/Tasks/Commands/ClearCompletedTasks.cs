@@ -14,19 +14,24 @@ namespace Application.Tasks.Commands.ClearCompletedTasks
     public class ClearCompletedTasksCommandHandler : IRequestHandler<ClearCompletedTasksCommand>
     {
         private readonly IApplicationDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ClearCompletedTasksCommandHandler(IApplicationDbContext context)
+        public ClearCompletedTasksCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
         {
             _context = context;
+            _currentUserService = currentUserService;
         }
 
         public async Task Handle(ClearCompletedTasksCommand request, CancellationToken cancellationToken)
         {
-            var completedTasks = await _context.Tasks.Where(t => t.IsCompleted).ToListAsync(cancellationToken);
+            var currentUserId = int.Parse(_currentUserService.UserId!);
+
+            var completedTasks = await _context.Tasks
+                .Where(t => t.IsCompleted && t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
+                .ToListAsync(cancellationToken);
 
             _context.Tasks.RemoveRange(completedTasks);
             await _context.SaveChangesAsync(cancellationToken);
-
         }
     }
 }
