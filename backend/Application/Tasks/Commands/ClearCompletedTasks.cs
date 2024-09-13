@@ -15,11 +15,13 @@ namespace Application.Tasks.Commands.ClearCompletedTasks
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly INotificationService _notificationService;
 
-        public ClearCompletedTasksCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        public ClearCompletedTasksCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, INotificationService notificationService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
 
         public async Task Handle(ClearCompletedTasksCommand request, CancellationToken cancellationToken)
@@ -35,6 +37,10 @@ namespace Application.Tasks.Commands.ClearCompletedTasks
 
             _context.Tasks.RemoveRange(completedTasks);
             await _context.SaveChangesAsync(cancellationToken);
+            foreach (var task in completedTasks)
+            {
+                await _notificationService.SendTaskDeletedNotification(task.TaskListId, task.Id);
+            }
         }
     }
 }

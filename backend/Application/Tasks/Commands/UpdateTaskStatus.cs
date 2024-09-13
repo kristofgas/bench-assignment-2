@@ -20,12 +20,15 @@ namespace Application.Tasks.Commands.UpdateTaskStatus
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<UpdateTaskStatusCommandHandler> _logger;
+        private readonly INotificationService _notificationService;
 
-        public UpdateTaskStatusCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, ILogger<UpdateTaskStatusCommandHandler> logger)
+
+        public UpdateTaskStatusCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, ILogger<UpdateTaskStatusCommandHandler> logger, INotificationService notificationService)
         {
             _context = context;
             _currentUserService = currentUserService;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         public async Task Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,7 @@ namespace Application.Tasks.Commands.UpdateTaskStatus
             _logger.LogInformation($"Updating task {request.Id} status to {request.IsCompleted}.");
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _notificationService.SendTaskUpdatedNotification(task.TaskListId, task.Id);
         }
     }
 }

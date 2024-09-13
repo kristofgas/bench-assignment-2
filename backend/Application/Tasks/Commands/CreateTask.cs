@@ -26,10 +26,13 @@ namespace Application.Tasks.Commands.CreateTask
     public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskDto>
     {
         private readonly IApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public CreateTaskCommandHandler(IApplicationDbContext context)
+
+        public CreateTaskCommandHandler(IApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -62,6 +65,7 @@ namespace Application.Tasks.Commands.CreateTask
             _context.Tasks.Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
+            await _notificationService.SendTaskCreatedNotification(entity.TaskListId, entity.Id);
             return new TaskDto
             {
                 Id = entity.Id,

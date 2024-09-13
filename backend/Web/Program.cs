@@ -15,6 +15,7 @@ using System.Text;
 using Application.Common.Interfaces;
 using Infrastructure.Services;
 using System;
+using Application.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,7 +102,7 @@ try
     InfrastructureServiceConfiguration.ConfigureServices(builder.Services, builder.Configuration, builder.Environment);
     WebServiceConfiguration.ConfigureServices(builder.Services, builder.Configuration);
 
-
+    builder.Services.AddSignalR();
 
     var app = builder.Build();
 
@@ -163,6 +164,8 @@ try
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller}/{action=Index}/{id?}");
+
+    app.MapHub<Application.Hubs.TaskHub>("/taskHub");
 
     using (var scope = app.Services.CreateScope())
     {

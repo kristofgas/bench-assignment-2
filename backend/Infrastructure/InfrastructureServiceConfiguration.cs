@@ -44,6 +44,7 @@ namespace Infrastructure
                         sqlConnectionStringBuilder.UserID = dbOptions.Username;
                     if (dbOptions.Password is not null)
                         sqlConnectionStringBuilder.Password = dbOptions.Password;
+                        sqlConnectionStringBuilder.Password = dbOptions.Password;
                     if (dbOptions.Server is not null)
                         sqlConnectionStringBuilder.DataSource = dbOptions.Server;
 
@@ -59,6 +60,7 @@ namespace Infrastructure
 
                 
             }
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.AddOptions<EncryptionOptions>()
                 .Bind(configuration.GetSection(EncryptionOptions.OptionsPath));

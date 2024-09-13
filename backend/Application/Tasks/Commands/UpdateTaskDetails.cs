@@ -19,11 +19,14 @@ namespace Application.Tasks.Commands.UpdateTaskDetails
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly INotificationService _notificationService;
 
-        public UpdateTaskDetailsCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+
+        public UpdateTaskDetailsCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, INotificationService notificationService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
 
         public async Task Handle(UpdateTaskDetailsCommand request, CancellationToken cancellationToken)
@@ -61,6 +64,7 @@ namespace Application.Tasks.Commands.UpdateTaskDetails
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _notificationService.SendTaskUpdatedNotification(task.TaskListId, task.Id);
 
         }
     }
