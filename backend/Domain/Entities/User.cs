@@ -11,6 +11,8 @@ namespace Domain.Entities
         public ICollection<TaskList> TaskLists { get; set; } = new List<TaskList>();
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<UserTaskList> UserTaskLists { get; set; } = new List<UserTaskList>();
+        public bool IsDeleted { get; set; } = false;
+        public DateTimeOffset? DeletedAt { get; set; }
 
     }
 }

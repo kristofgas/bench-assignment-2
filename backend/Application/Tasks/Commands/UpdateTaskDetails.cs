@@ -29,9 +29,9 @@ namespace Application.Tasks.Commands.UpdateTaskDetails
         public async Task Handle(UpdateTaskDetailsCommand request, CancellationToken cancellationToken)
         {
             var task = await _context.Tasks
-                .Include(t => t.TaskList)
-                .ThenInclude(tl => tl.UserTaskLists)
-                .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
+    .Include(t => t.TaskList)
+    .ThenInclude(tl => tl.UserTaskLists.Where(utl => !utl.IsDeleted))
+    .FirstOrDefaultAsync(t => t.Id == request.Id && !t.User!.IsDeleted, cancellationToken);
 
             if (task == null)
             {

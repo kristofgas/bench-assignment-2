@@ -28,14 +28,15 @@ namespace Application.Tasks.Queries.GetTaskSummary
             var currentUserId = int.Parse(_currentUserService.UserId!);
 
             var summary = await _context.Tasks
-                .Where(t => t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
-                .GroupBy(t => 1)
-                .Select(g => new TaskSummaryDto
-                {
-                    TotalTasks = g.Count(),
-                    CompletedTasks = g.Sum(t => t.IsCompleted ? 1 : 0)
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+    .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
+                && !t.User!.IsDeleted)
+    .GroupBy(t => 1)
+    .Select(g => new TaskSummaryDto
+    {
+        TotalTasks = g.Count(),
+        CompletedTasks = g.Sum(t => t.IsCompleted ? 1 : 0)
+    })
+    .FirstOrDefaultAsync(cancellationToken);
 
             return summary ?? new TaskSummaryDto();
         }

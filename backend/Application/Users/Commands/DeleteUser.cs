@@ -26,8 +26,6 @@ namespace Application.Users.Commands.DeleteUser
         public async System.Threading.Tasks.Task Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _context.Users
-                .Include(u => u.TaskLists)
-                    .ThenInclude(tl => tl.Tasks)
                 .Include(u => u.UserTaskLists)
                 .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
@@ -36,11 +34,16 @@ namespace Application.Users.Commands.DeleteUser
                 throw new NotFoundException(nameof(User), request.UserId);
             }
 
-            _context.UserTaskLists.RemoveRange(user.UserTaskLists);
+            user.IsDeleted = true;
+            user.DeletedAt = DateTimeOffset.UtcNow;
 
-            _context.Users.Remove(user);
+            foreach (var userTaskList in user.UserTaskLists)
+            {
+                userTaskList.IsDeleted = true;
+                userTaskList.DeletedAt = DateTimeOffset.UtcNow;
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
-
         }
     }
 }

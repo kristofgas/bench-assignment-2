@@ -11,5 +11,8 @@ namespace Domain.Entities
         [Key]
         public int TaskListId { get; set; }
         public TaskList TaskList { get; set; } = null!;
+
+        public bool IsDeleted { get; set; } = false;
+        public DateTimeOffset? DeletedAt { get; set; }
     }
 }

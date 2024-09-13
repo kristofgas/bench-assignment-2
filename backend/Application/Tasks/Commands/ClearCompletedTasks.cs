@@ -27,10 +27,11 @@ namespace Application.Tasks.Commands.ClearCompletedTasks
             var currentUserId = int.Parse(_currentUserService.UserId!);
 
             var completedTasks = await _context.Tasks
-    .Include(t => t.TaskList)
-    .ThenInclude(tl => tl.UserTaskLists)
-    .Where(t => t.IsCompleted && t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
-    .ToListAsync(cancellationToken);
+.Include(t => t.TaskList)
+.ThenInclude(tl => tl.UserTaskLists)
+.Where(t => t.IsCompleted && t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
+.ToListAsync(cancellationToken);
+
 
             _context.Tasks.RemoveRange(completedTasks);
             await _context.SaveChangesAsync(cancellationToken);

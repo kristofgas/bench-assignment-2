@@ -35,8 +35,8 @@ namespace Application.Tasks.Commands.CreateTask
         public async Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
             var taskList = await _context.TaskLists
-                .Include(tl => tl.UserTaskLists)
-                .FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, cancellationToken);
+                    .Include(tl => tl.UserTaskLists.Where(utl => !utl.IsDeleted))
+                    .FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, cancellationToken);
 
             if (taskList == null)
             {

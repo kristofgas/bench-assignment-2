@@ -5,6 +5,7 @@ using Application.Common.Security;
 using Application.Common.Exceptions;
 using Domain.Entities;
 using Application.Common.Security.Attributes;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Application.TaskLists.Commands.CreateTaskList
@@ -28,7 +29,7 @@ namespace Application.TaskLists.Commands.CreateTaskList
 
         public async Task<TaskListDto> Handle(CreateTaskListCommand request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.FindAsync(request.UserId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && !u.IsDeleted);
             if (user == null)
             {
                 throw new NotFoundException(nameof(User), request.UserId);

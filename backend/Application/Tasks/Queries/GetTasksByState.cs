@@ -34,9 +34,8 @@ namespace Application.Tasks.Queries.GetTasksByState
             var currentUserId = int.Parse(_currentUserService.UserId!);
 
             var query = _context.Tasks
-    .Include(t => t.TaskList)
-    .ThenInclude(tl => tl.UserTaskLists)
-    .Where(t => t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId))
+    .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
+                && !t.User!.IsDeleted)
     .Where(t => request.IsCompleted == null || t.IsCompleted == request.IsCompleted)
     .Where(t => request.IsFavorite == null || t.IsFavorite == request.IsFavorite);
             if (request.SortBy == "rank")

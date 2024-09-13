@@ -28,8 +28,8 @@ namespace Application.TaskLists.Commands.ShareTaskList
         public async Task Handle(ShareTaskListCommand request, CancellationToken cancellationToken)
         {
             var taskList = await _context.TaskLists
-                .Include(tl => tl.UserTaskLists)
-                .FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, cancellationToken);
+    .Include(tl => tl.UserTaskLists.Where(utl => !utl.IsDeleted))
+    .FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, cancellationToken);
 
             if (taskList == null)
             {

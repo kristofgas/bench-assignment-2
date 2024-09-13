@@ -95,6 +95,11 @@ namespace Infrastructure.Persistence
                 .WithMany(tl => tl.UserTaskLists)
                 .HasForeignKey(utl => utl.TaskListId);
 
+            builder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+            builder.Entity<UserTaskList>().HasQueryFilter(utl => !utl.IsDeleted);
+            builder.Entity<Task>().HasQueryFilter(t => !t.User!.IsDeleted);
+            builder.Entity<TaskList>().HasQueryFilter(tl => !tl.UserTaskLists.Any(utl => utl.IsDeleted));
+
             base.OnModelCreating(builder);
         }
 
