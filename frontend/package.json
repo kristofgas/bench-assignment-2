@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tanstack/react-query": "^5.17.0",
     "cookies-next": "^2.1.2",
     "i18next": "^23.2.11",
     "next": "^13.4.10",
