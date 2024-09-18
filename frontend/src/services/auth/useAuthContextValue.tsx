@@ -1,51 +1,74 @@
 import { useCallback, useState } from "react";
 import { genApiClient, setToken } from "services/backend/genApiClient";
+import { LoginResult, RegisterUserCommand } from "../backend/client.generated";
 
 export enum AuthStage {
-  CHECKING,
-  AUTHENTICATED,
-  UNAUTHENTICATED,
+  CHECKING = "CHECKING",
+  AUTHENTICATED = "AUTHENTICATED",
+  UNAUTHENTICATED = "UNAUTHENTICATED",
 }
 
-type AuthHook<T> = {
+type AuthHook = {
   authStage: AuthStage;
-  login: (token: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  activeUser: T | null;
+  activeUser: LoginResult | null;
   checkAuth: () => Promise<void>;
 };
 
-// TODO this is a dummy model, implement the correct DTO when auth has been set up
-type User = { id: string } | null;
+export const useAuthContextValue = (): AuthHook => {
+  const [authStage, setAuthStage] = useState<AuthStage>(AuthStage.UNAUTHENTICATED);
+  const [activeUser, setActiveUser] = useState<LoginResult | null>(null);
 
-export const useAuthContextValue = (initialUser?: User): AuthHook<User> => {
-  const [authStage, setAuthStage] = useState(
-    initialUser ? AuthStage.AUTHENTICATED : AuthStage.CHECKING
-  );
-  const [activeUser, setActiveUser] = useState<User>(initialUser);
-
-  /**
-   * This method should fetch the user from the authorization server. The issuer of the token essentially.
-   */
   const checkAuth = useCallback(async () => {
     setAuthStage(AuthStage.CHECKING);
-
-    const authClient = await genApiClient();
-    // const user: User = await authClient.auth_GetUser().catch(() => null);
-    // setActiveUser(user);
-    // setAuthStage(user ? AuthStage.AUTHENTICATED : AuthStage.UNAUTHENTICATED);
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      setToken(token);
+      setAuthStage(AuthStage.AUTHENTICATED);
+    } else {
+      setAuthStage(AuthStage.UNAUTHENTICATED);
+    }
   }, []);
 
-  const login = useCallback(async (idToken: string) => {
-    setToken(idToken);
-    return true;
+  const login = useCallback(async (username: string, password: string) => {
+    const client = await genApiClient();
+    try {
+      const response = await client.users_Login({ username, password });
+      console.log('Login response:', response);
+      if (response && response.token) {
+        setToken(response.token);
+        setActiveUser(response);
+        setAuthStage(AuthStage.AUTHENTICATED);
+        return true;
+      } else {
+        console.error('Login failed: No token received');
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  }, []);
+
+  const register = useCallback(async (username: string, password: string) => {
+    const client = await genApiClient();
+    try {
+      const command: RegisterUserCommand = { username, password };
+      await client.users_Register(command);
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
   const logout = useCallback(() => {
     setToken("");
+    localStorage.removeItem('jwtToken');
     setActiveUser(null);
     setAuthStage(AuthStage.UNAUTHENTICATED);
   }, []);
 
-  return { authStage, login, logout, activeUser, checkAuth };
+  return { authStage, login, register, logout, activeUser, checkAuth };
 };

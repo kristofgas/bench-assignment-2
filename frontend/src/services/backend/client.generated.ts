@@ -262,6 +262,163 @@ export class ApiFetchClient extends ClientBase {
         return Promise.resolve<TaskListDto>(null as any);
     }
 
+    tasks_GetUserTaskLists(signal?: AbortSignal | undefined): Promise<TaskListDto[]> {
+        let url_ = this.baseUrl + "/api/Tasks/lists";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTasks_GetUserTaskLists(_response));
+        });
+    }
+
+    protected processTasks_GetUserTaskLists(response: Response): Promise<TaskListDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TaskListDto[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TaskListDto[]>(null as any);
+    }
+
+    tasks_GetTask(id: number, signal?: AbortSignal | undefined): Promise<TaskDto> {
+        let url_ = this.baseUrl + "/api/Tasks/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTasks_GetTask(_response));
+        });
+    }
+
+    protected processTasks_GetTask(response: Response): Promise<TaskDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TaskDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TaskDto>(null as any);
+    }
+
+    tasks_GetTaskList(id: number, signal?: AbortSignal | undefined): Promise<TaskListDto> {
+        let url_ = this.baseUrl + "/api/Tasks/lists/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTasks_GetTaskList(_response));
+        });
+    }
+
+    protected processTasks_GetTaskList(response: Response): Promise<TaskListDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TaskListDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TaskListDto>(null as any);
+    }
+
+    tasks_UpdateTaskList(id: number, command: UpdateTaskListCommand, signal?: AbortSignal | undefined): Promise<TaskListDto> {
+        let url_ = this.baseUrl + "/api/Tasks/lists/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            signal,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTasks_UpdateTaskList(_response));
+        });
+    }
+
+    protected processTasks_UpdateTaskList(response: Response): Promise<TaskListDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TaskListDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TaskListDto>(null as any);
+    }
+
     tasks_ShareTaskList(id: number, userIdsToShare: number[], signal?: AbortSignal | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/Tasks/lists/{id}/share";
         if (id === undefined || id === null)
@@ -475,7 +632,7 @@ export class ApiFetchClient extends ClientBase {
         return Promise.resolve<FileResponse>(null as any);
     }
 
-    tasks_GetTasksByState(isCompleted?: boolean | null | undefined, isFavorite?: boolean | null | undefined, sortBy?: string | null | undefined, sortDescending?: boolean | undefined, signal?: AbortSignal | undefined): Promise<TaskDto[]> {
+    tasks_GetTasksByState(isCompleted?: boolean | null | undefined, isFavorite?: boolean | null | undefined, sortBy?: string | null | undefined, sortDescending?: boolean | undefined, taskListId?: number | null | undefined, signal?: AbortSignal | undefined): Promise<TaskDto[]> {
         let url_ = this.baseUrl + "/api/Tasks/filter?";
         if (isCompleted !== undefined && isCompleted !== null)
             url_ += "IsCompleted=" + encodeURIComponent("" + isCompleted) + "&";
@@ -487,6 +644,8 @@ export class ApiFetchClient extends ClientBase {
             throw new Error("The parameter 'sortDescending' cannot be null.");
         else if (sortDescending !== undefined)
             url_ += "SortDescending=" + encodeURIComponent("" + sortDescending) + "&";
+        if (taskListId !== undefined && taskListId !== null)
+            url_ += "TaskListId=" + encodeURIComponent("" + taskListId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -1169,6 +1328,12 @@ export interface CreateTaskCommand {
     rank?: number;
     color?: string;
     isFavorite?: boolean;
+}
+
+export interface UpdateTaskListCommand {
+    id?: number;
+    name?: string | null;
+    description?: string | null;
 }
 
 export interface UpdateTaskStatusCommand {

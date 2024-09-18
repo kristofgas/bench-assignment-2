@@ -4,12 +4,14 @@ import Head from "next/head";
 import { ReactElement } from "react";
 import { AuthContextProvider } from "services/auth/useAuth";
 import { LocaleContextProvider } from "services/locale/useLocale";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export function reportWebVitals(metric: NextWebVitalsMetric): void {
   // TODO consider removing before moving into production. Or limit the scope.
   // Read more: https://nextjs.org/docs/advanced-features/measuring-performance
   console.debug(metric);
 }
+const queryClient = new QueryClient();
 
 const MyApp = ({ Component, pageProps, __N_SSG }: AppProps): ReactElement => {
   // usePWA(); //! OPT IN
@@ -23,7 +25,7 @@ const MyApp = ({ Component, pageProps, __N_SSG }: AppProps): ReactElement => {
         <meta name="theme-color" content="#2196f3" />
         <meta name="description" content={process.env.NEXT_PUBLIC_APP_NAME} />
         <meta name="robots" content="noindex" />
-
+  
         <link rel="manifest" href="/manifest.json" />
         <link
           rel="apple-touch-icon"
@@ -33,13 +35,15 @@ const MyApp = ({ Component, pageProps, __N_SSG }: AppProps): ReactElement => {
       <noscript>
         <h1>JavaScript must be enabled!</h1>
       </noscript>
-      <AuthContextProvider>
-        <I18nProvider table={pageProps.table}>
-          <LocaleContextProvider>
-            <Component {...pageProps} />
-          </LocaleContextProvider>
-        </I18nProvider>
-      </AuthContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthContextProvider>
+          <I18nProvider table={pageProps.table}>
+            <LocaleContextProvider>
+              <Component {...pageProps} />
+            </LocaleContextProvider>
+          </I18nProvider>
+        </AuthContextProvider>
+      </QueryClientProvider>
     </main>
   );
 };

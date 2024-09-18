@@ -4,7 +4,6 @@ import { getEnvFromServer } from "../env/getEnvFromServer";
 
 import { ApiFetchClient, ClientBase, ClientConfiguration } from "./types";
 
-
 interface NSwagClient<T extends ClientBase> {
   new (
     configuration: ClientConfiguration,
@@ -12,6 +11,8 @@ interface NSwagClient<T extends ClientBase> {
     http?: { fetch: typeof fetch }
   ): T;
 }
+
+
 
 export const genClient = async <T extends ClientBase, V extends NSwagClient<T>>(
   Client: V,
@@ -23,8 +24,17 @@ export const genClient = async <T extends ClientBase, V extends NSwagClient<T>>(
   return new Client(
     config,
     backendUrl,
-    _fetch && {
-      fetch: _fetch,
+    {
+      fetch: async (url, init) => {
+        const token = getToken();
+        if (token) {
+          init.headers = {
+            ...init.headers,
+            Authorization: `Bearer ${token}`,
+          };
+        }
+        return _fetch ? _fetch(url, init) : fetch(url, init);
+      },
     }
   ) as InstanceType<V>;
 };
@@ -48,7 +58,7 @@ const getTokenFromCookie = (context?: GetServerSidePropsContext) => {
 };
 
 const getToken = (context?: GetServerSidePropsContext) => {
-  return getTokenFromCookie(context);
+  return getTokenFromStorage() || getTokenFromCookie(context);
 };
 
 const getEnv = async (): Promise<ReturnType<typeof getEnvFromServer>> => {
@@ -62,13 +72,10 @@ const cookieSettings = {
   maxAge: 43200, //30 days
 };
 
-export const setToken = (
-  token: string,
-  context?: GetServerSidePropsContext
-) => {
-  if (process.browser) setCookie(AUTHTOKENKEY, token, cookieSettings);
-  if (!context) throw Error("Cant set cookie on server without context");
-  setCookie(AUTHTOKENKEY, token, { ...context, ...cookieSettings });
+export const setToken = (token: string) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(AUTHTOKENKEY, token);
+  }
 };
 
 export const genApiClient = () => genClient(ApiFetchClient);

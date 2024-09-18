@@ -1,44 +1,82 @@
-import { Locale } from "i18n/Locale";
-import { GetStaticProps, NextPage } from "next";
-import { I18nProps } from "next-rosetta";
-import { genApiClient } from "services/backend/genApiClient";
-import { useLocale } from "services/locale/useLocale";
-import { useMemoAsync } from "utils/hooks/useMemoAsync";
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { genApiClient } from '../services/backend/genApiClient';
+import { TaskListDto } from '../services/backend/types';
+import TaskList from '../components/TaskList';
+import Login from '../components/Login';
+import Register from '../components/Register';
+import { useAuth } from '../services/auth/useAuth';
+import { AuthStage } from '../services/auth/useAuthContextValue';
 
-const Page: NextPage = () => {
-  const { t } = useLocale();
+const HomePage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [newList, setNewList] = React.useState({ name: '', description: '' });
+  const { authStage, activeUser, logout } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
 
-  const { value, loading } = useMemoAsync(
-    async () => {
+  const { data: taskLists, isLoading, error } = useQuery<TaskListDto[]>({
+    queryKey: ['taskLists'],
+    queryFn: async () => {
       const client = await genApiClient();
-      const result = await client.templateExampleCustomer_GetAll();
-      const test = await client.index_Hello("bob");
-      return result;
+      const lists = await client.tasks_GetUserTaskLists();
+      console.log('Fetched task lists:', lists);
+      return lists;
     },
-    [],
-    []
-  );
+    enabled: authStage === AuthStage.AUTHENTICATED,
+  });
+
+  const createListMutation = useMutation({
+    mutationFn: async (list: { name: string; description: string }) => {
+      const client = await genApiClient();
+      return client.tasks_CreateTaskList(list);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+      setNewList({ name: '', description: '' });
+    },
+  });
+
+  if (authStage === AuthStage.UNAUTHENTICATED) {
+    return (
+      <div>
+        {showRegister ? <Register /> : <Login />}
+        <button onClick={() => setShowRegister(!showRegister)}>
+          {showRegister ? 'Switch to Login' : 'Switch to Register'}
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.toString()}</div>;
 
   return (
-    <>
-      <h1>{t("strings.example")}</h1>
-      {loading && <div>... loading</div>}
-      {!loading && value && <div>{JSON.stringify(value, null, 2)}</div>}
-    </>
+    <div>
+    <h1>Task Lists</h1>
+    <form onSubmit={(e) => {
+  e.preventDefault();
+  createListMutation.mutate(newList);
+}}>
+      <input
+        type="text"
+        value={newList.name}
+        onChange={(e) => setNewList({...newList, name: e.target.value})}
+        placeholder="New list name"
+        required
+      />
+      <textarea
+        value={newList.description}
+        onChange={(e) => setNewList({...newList, description: e.target.value})}
+        placeholder="New list description"
+        required
+      />
+      <button type="submit">Create New List</button>
+    </form>
+    {taskLists?.map(list => (
+      <TaskList key={list.id} listId={list.id} />
+    ))}
+  </div>
   );
 };
 
-export const getStaticProps: GetStaticProps<I18nProps<Locale>> = async (
-  context
-) => {
-  const locale = context.locale || context.defaultLocale;
-  const { table = {} } = await import(`../i18n/${locale}`); //!Note you might need to change the path depending on page depth
-
-  return {
-    props: { table },
-  };
-};
-
-Page.displayName = "Page";
-
-export default Page;
+export default HomePage;
