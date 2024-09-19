@@ -1,46 +1,31 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { genApiClient } from '../services/backend/genApiClient';
-import { Task, TaskList as TaskListType, NewTask } from '../types/task';
+import { TaskList as TaskListType, NewTask, Task } from '../types/task';
 import { priorityOptions, colorOptions, getRankValue, Color, Priority } from '../utils/taskUtils';
 import FilterTasks, { TaskFilters } from './FilterTasks';
 import TaskDetails from './TaskDetails';
-import { useCreateTask } from '../hooks/useCreateTask';
+import { useTaskList } from '../hooks/useTaskList';
 
 interface TaskListProps {
   listId: number;
 }
 
 const TaskList: React.FC<TaskListProps> = ({ listId }) => {
-  const queryClient = useQueryClient();
   const [newTask, setNewTask] = useState<NewTask>({ title: '', description: '', rank: 'Low', color: '#FF0000' });
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [filters, setFilters] = useState<TaskFilters>({ isCompleted: null, isFavorite: null, sortDescending: false });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const { data: taskList, isLoading, error } = useQuery<TaskListType>({
-    queryKey: ['taskList', listId],
-    queryFn: async () => {
-      const client = await genApiClient();
-      const result = await client.tasks_GetTaskList(listId);
-      return result as TaskListType;
-    }
-  });
-
-  const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['tasks', listId, filters],
-    queryFn: async () => {
-      const client = await genApiClient();
-      const result = await client.tasks_GetTasksByState(
-        filters.isCompleted,
-        filters.isFavorite,
-        filters.sortBy,
-        filters.sortDescending,
-        listId
-      );
-      return result as Task[];
-    }
-  });
+  const {
+    taskList,
+    isTaskListLoading,
+    taskListError,
+    tasks,
+    isTasksLoading,
+    tasksError,
+    createTaskMutation,
+    updateTaskStatusMutation,
+    updateTaskDetailsMutation
+  } = useTaskList(listId, filters);
 
   const sortTasks = useMemo(() => (a: Task, b: Task) => {
     if (filters.sortBy === 'title') {
@@ -50,21 +35,8 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
     }
     return 0;
   }, [filters.sortBy, filters.sortDescending]);
-  
-  const filteredTasks = useMemo(() => tasks || [], [tasks]);
 
-  const createTaskMutation = useCreateTask(listId);
-
-  const toggleTaskStatus = useMutation({
-    mutationFn: async (taskId: number) => {
-      const client = await genApiClient();
-      const task = tasks?.find(t => t.id === taskId);
-      return client.tasks_UpdateTaskStatus(taskId, { id: taskId, isCompleted: !task?.isCompleted });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId] });
-    },
-  });
+  const filteredTasks = useMemo(() => tasks?.sort(sortTasks) || [], [tasks, sortTasks]);
 
   const handleFilterChange = (newFilters: TaskFilters) => {
     setFilters(newFilters);
@@ -74,8 +46,8 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
     setSelectedTask(task);
   };
 
-  if (isLoading || tasksLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading task list: {error.message}</div>;
+  if (isTaskListLoading || isTasksLoading) return <div>Loading...</div>;
+  if (taskListError || tasksError) return <div>Error loading task list: {(taskListError || tasksError).toString()}</div>;
 
   return (
     <div>
@@ -87,7 +59,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
             <input
               type="checkbox"
               checked={task.isCompleted}
-              onChange={() => toggleTaskStatus.mutate(task.id)}
+              onChange={() => updateTaskStatusMutation.mutate(task.id)}
               onClick={(e) => e.stopPropagation()}
             />
             {task.title}
@@ -144,6 +116,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
         <TaskDetails
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
+          onUpdate={(updatedTask) => updateTaskDetailsMutation.mutate(updatedTask)}
         />
       )}
     </div>

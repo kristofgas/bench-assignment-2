@@ -14,6 +14,7 @@ namespace Application.Tasks.Queries.GetTasksByState
         public bool? IsFavorite { get; set; }
         public string? SortBy { get; set; }
         public bool SortDescending { get; set; } = false;
+        public int? TaskListId { get; set; }
     }
 
     public class GetTasksByStateQueryHandler : IRequestHandler<GetTasksByStateQuery, List<TaskDto>>
@@ -34,10 +35,12 @@ namespace Application.Tasks.Queries.GetTasksByState
             var currentUserId = int.Parse(_currentUserService.UserId!);
 
             var query = _context.Tasks
-    .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
-                && !t.User!.IsDeleted)
-    .Where(t => request.IsCompleted == null || t.IsCompleted == request.IsCompleted)
-    .Where(t => request.IsFavorite == null || t.IsFavorite == request.IsFavorite);
+                .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
+                            && !t.User!.IsDeleted)
+                .Where(t => request.IsCompleted == null || t.IsCompleted == request.IsCompleted)
+                .Where(t => request.IsFavorite == null || t.IsFavorite == request.IsFavorite)
+                .Where(t => request.TaskListId == null || t.TaskListId == request.TaskListId);
+
             if (request.SortBy == "rank")
             {
                 query = request.SortDescending

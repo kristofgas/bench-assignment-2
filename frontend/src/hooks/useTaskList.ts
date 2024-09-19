@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { genApiClient } from '../services/backend/genApiClient';
 import { TaskList, Task, NewTask, UpdateTaskDetails } from '../types/task';
-import { getRankValue } from 'utils/taskUtils';
+import { getRankValue } from '../utils/taskUtils';
+import { TaskFilters } from '../components/FilterTasks';
 
-export const useTaskList = (listId: number) => {
+export const useTaskList = (listId: number, filters: TaskFilters) => {
   const queryClient = useQueryClient();
 
   const { data: taskList, isLoading: isTaskListLoading, error: taskListError } = useQuery<TaskList>({
@@ -20,10 +21,16 @@ export const useTaskList = (listId: number) => {
   });
 
   const { data: tasks, isLoading: isTasksLoading, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['tasks', listId],
+    queryKey: ['tasks', listId, filters],
     queryFn: async () => {
       const client = await genApiClient();
-      const result = await client.tasks_GetTasksByState(null, null, null, false, listId);
+      const result = await client.tasks_GetTasksByState(
+        filters.isCompleted,
+        filters.isFavorite,
+        filters.sortBy,
+        filters.sortDescending,
+        listId
+      );
       return result.map(task => ({
         id: task.id ?? 0,
         title: task.title,
@@ -37,7 +44,6 @@ export const useTaskList = (listId: number) => {
     },
   });
 
-
   const createTaskMutation = useMutation({
     mutationFn: async (newTask: NewTask) => {
       const client = await genApiClient();
@@ -48,7 +54,7 @@ export const useTaskList = (listId: number) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['tasks', listId]});
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
     },
   });
 
@@ -59,7 +65,7 @@ export const useTaskList = (listId: number) => {
       return client.tasks_UpdateTaskStatus(taskId, { id: taskId, isCompleted: !task?.isCompleted });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['tasks', listId]});
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
     },
   });
 
@@ -69,7 +75,7 @@ export const useTaskList = (listId: number) => {
       return client.tasks_UpdateTaskDetails(updatedTask.id, updatedTask);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['tasks', listId]});
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
     },
   });
 

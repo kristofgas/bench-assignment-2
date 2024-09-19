@@ -14,6 +14,10 @@ using Application.Common.Interfaces;
 using Application.TaskLists.Commands.ShareTaskList;
 using Application.Common.Exceptions;
 using Application.Tasks.Commands.UpdateTaskDetails;
+using Application.TaskLists.Queries.GetTaskList;
+using Application.Tasks.Queries.GetTask;
+using Application.TaskLists.Commands.UpdateTaskList;
+using Application.TaskLists.Queries.GetUserTaskLists;
 
 namespace Web.Controllers
 {
@@ -40,6 +44,18 @@ namespace Web.Controllers
             return await Mediator.Send(command);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TaskDto>> GetTask(int id)
+        {
+            return await Mediator.Send(new GetTaskQuery { Id = id });
+        }
+
+        [HttpGet("lists/{id}")]
+        public async Task<ActionResult<TaskListDto>> GetTaskList(int id)
+        {
+            return await Mediator.Send(new GetTaskListQuery { Id = id });
+        }
+
         [HttpPost("lists/{id}/share")]
         public async Task<ActionResult> ShareTaskList(int id, [FromBody] List<int> userIdsToShare)
         {
@@ -58,6 +74,23 @@ namespace Web.Controllers
 
             command.UserId = parsedUserId;
             return await Mediator.Send(command);
+        }
+
+        [HttpPut("lists/{id}")]
+        public async Task<ActionResult<TaskListDto>> UpdateTaskList(int id, UpdateTaskListCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest();
+            }
+
+            return await Mediator.Send(command);
+        }
+
+        [HttpGet("lists")]
+        public async Task<ActionResult<List<TaskListDto>>> GetUserTaskLists()
+        {
+            return await Mediator.Send(new GetUserTaskListsQuery());
         }
 
 

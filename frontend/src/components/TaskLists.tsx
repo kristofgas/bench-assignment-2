@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useQuery, useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { genApiClient } from '../services/backend/genApiClient';
 import { TaskListDto } from '../services/backend/types';
 import { useCreateTaskList } from '../hooks/useCreateTaskList';
 import TaskList from './TaskList';
 
 const TaskLists: React.FC = () => {
-  const queryClient = useQueryClient();
   const [newList, setNewList] = useState({ name: '', description: '' });
 
   const { data: taskLists, isLoading, error } = useQuery<TaskListDto[]>({
@@ -31,7 +30,6 @@ const TaskLists: React.FC = () => {
         createListMutation.mutate(newList, {
           onSuccess: () => {
             setNewList({ name: '', description: '' });
-            queryClient.invalidateQueries({ queryKey: ['taskLists'] } as InvalidateQueryFilters);
           }
         });
       }}>

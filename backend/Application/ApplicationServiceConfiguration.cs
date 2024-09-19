@@ -1,11 +1,15 @@
 ﻿using Application.Common.Behaviours;
 using Application.Common.Interfaces;
 using Application.TaskLists.Commands.CreateTaskList;
+using Application.TaskLists.Commands.UpdateTaskList;
 using Application.TaskLists.Dto;
+using Application.TaskLists.Queries.GetTaskList;
+using Application.TaskLists.Queries.GetUserTaskLists;
 using Application.Tasks.Commands.ClearCompletedTasks;
 using Application.Tasks.Commands.CreateTask;
 using Application.Tasks.Commands.UpdateTaskStatus;
 using Application.Tasks.Dto;
+using Application.Tasks.Queries.GetTask;
 using Application.Tasks.Queries.GetTasksByState;
 using Application.Tasks.Queries.GetTaskSummary;
 using Domain.Entities;
@@ -35,6 +39,10 @@ namespace Application
             services.AddTransient<IRequestHandler<GetTaskSummaryQuery, TaskSummaryDto>, GetTaskSummaryQueryHandler>();
             services.AddTransient<IRequestHandler<ClearCompletedTasksCommand>, ClearCompletedTasksCommandHandler>();
             services.AddTransient<IRequestHandler<GetTasksByStateQuery, List<TaskDto>>, GetTasksByStateQueryHandler>();
+            services.AddTransient<IRequestHandler<GetTaskQuery, TaskDto>, GetTaskQueryHandler>();
+            services.AddTransient<IRequestHandler<GetTaskListQuery, TaskListDto>, GetTaskListQueryHandler>();
+            services.AddTransient<IRequestHandler<UpdateTaskListCommand, TaskListDto>, UpdateTaskListCommandHandler>();
+            services.AddTransient<IRequestHandler<GetUserTaskListsQuery, List<TaskListDto>>, GetUserTaskListsQueryHandler>();
 
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
