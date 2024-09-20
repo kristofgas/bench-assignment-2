@@ -1,23 +1,30 @@
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { genApiClient } from '../services/backend/genApiClient';
 import { TaskListDto } from '../services/backend/types';
-import { useCreateTaskList } from '../hooks/useCreateTaskList';
 import TaskList from './TaskList';
+import { useApi } from '../hooks/useApi';
+
+import { useTaskOperations } from '../hooks/useTaskOperations';
+
 
 const TaskLists: React.FC = () => {
   const [newList, setNewList] = useState({ name: '', description: '' });
+  const queryClient = useQueryClient();
+  const { apiCall } = useApi();
 
   const { data: taskLists, isLoading, error } = useQuery<TaskListDto[]>({
     queryKey: ['taskLists'],
-    queryFn: async () => {
-      const client = await genApiClient();
-      const lists = await client.tasks_GetUserTaskLists();
-      return lists;
-    },
+    queryFn: () => apiCall(client => client.tasks_GetUserTaskLists()),
   });
 
-  const createListMutation = useCreateTaskList();
+  const createListMutation = useMutation({
+    mutationFn: (list: { name: string; description: string }) => 
+      apiCall(client => client.tasks_CreateTaskList(list)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+    },
+  });
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
