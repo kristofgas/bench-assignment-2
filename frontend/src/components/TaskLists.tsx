@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { genApiClient } from '../services/backend/genApiClient';
 import { TaskListDto } from '../services/backend/types';
@@ -19,20 +19,22 @@ const TaskLists: React.FC = () => {
 
   const createListMutation = useCreateTaskList();
 
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    createListMutation.mutate(newList, {
+      onSuccess: () => {
+        setNewList({ name: '', description: '' });
+      }
+    });
+  }, [createListMutation, newList]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.toString()}</div>;
 
   return (
     <div>
       <h1>Task Lists</h1>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        createListMutation.mutate(newList, {
-          onSuccess: () => {
-            setNewList({ name: '', description: '' });
-          }
-        });
-      }}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           value={newList.name}

@@ -24,7 +24,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, onClose, onUpdate }) =>
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
   }, []);
-
+  
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     onUpdate({

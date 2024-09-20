@@ -4,6 +4,7 @@ import { priorityOptions, colorOptions, getRankValue, Color, Priority } from '..
 import FilterTasks, { TaskFilters } from './FilterTasks';
 import TaskDetails from './TaskDetails';
 import { useTaskList } from '../hooks/useTaskList';
+import { useFilteredTasks } from '../hooks/useFilteredTasks';
 
 interface TaskListProps {
   listId: number;
@@ -27,16 +28,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
     updateTaskDetailsMutation
   } = useTaskList(listId, filters);
 
-  const sortTasks = useMemo(() => (a: Task, b: Task) => {
-    if (filters.sortBy === 'title') {
-      return filters.sortDescending ? b.title.localeCompare(a.title) : a.title.localeCompare(b.title);
-    } else if (filters.sortBy === 'rank') {
-      return filters.sortDescending ? b.rank - a.rank : a.rank - b.rank;
-    }
-    return 0;
-  }, [filters.sortBy, filters.sortDescending]);
-
-  const filteredTasks = useMemo(() => tasks?.sort(sortTasks) || [], [tasks, sortTasks]);
+  const filteredTasks = useFilteredTasks(tasks, filters);
 
   const handleFilterChange = (newFilters: TaskFilters) => {
     setFilters(newFilters);
