@@ -18,6 +18,8 @@ using Application.TaskLists.Queries.GetTaskList;
 using Application.Tasks.Queries.GetTask;
 using Application.TaskLists.Commands.UpdateTaskList;
 using Application.TaskLists.Queries.GetUserTaskLists;
+using Application.Users.Dto;
+using Application.Users.Queries.GetUsersByTaskListAssociation;
 
 namespace Web.Controllers
 {
@@ -159,6 +161,12 @@ namespace Web.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpGet("lists/{id}/users")]
+        public async Task<ActionResult<List<UserDto>>> GetUsersByTaskListAssociation(int id, [FromQuery] bool isAssociated)
+        {
+            return await Mediator.Send(new GetUsersByTaskListAssociationQuery { TaskListId = id, IsAssociated = isAssociated });
         }
     }
 }

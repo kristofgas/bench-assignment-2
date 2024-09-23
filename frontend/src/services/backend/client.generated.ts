@@ -728,6 +728,49 @@ export class ApiFetchClient extends ClientBase {
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    tasks_GetUsersByTaskListAssociation(id: number, isAssociated?: boolean | undefined, signal?: AbortSignal | undefined): Promise<UserDto[]> {
+        let url_ = this.baseUrl + "/api/Tasks/lists/{id}/users?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (isAssociated === null)
+            throw new Error("The parameter 'isAssociated' cannot be null.");
+        else if (isAssociated !== undefined)
+            url_ += "isAssociated=" + encodeURIComponent("" + isAssociated) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processTasks_GetUsersByTaskListAssociation(_response));
+        });
+    }
+
+    protected processTasks_GetUsersByTaskListAssociation(response: Response): Promise<UserDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto[]>(null as any);
+    }
+
     templateExampleCustomer_Create(command: CreateTemplateExampleCustomerCommand, signal?: AbortSignal | undefined): Promise<number> {
         let url_ = this.baseUrl + "/api/TemplateExampleCustomer/Create";
         url_ = url_.replace(/[?&]$/, "");
@@ -1351,6 +1394,11 @@ export interface UpdateTaskDetailsCommand {
     rank?: number | null;
     color?: string | null;
     isFavorite?: boolean | null;
+}
+
+export interface UserDto {
+    userId?: number;
+    username?: string;
 }
 
 export interface CreateUpdateTemplateExampleCustomerDTO {

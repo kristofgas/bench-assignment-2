@@ -3,21 +3,21 @@ import { Task } from '../types/task';
 
 interface TaskItemProps {
   task: Task;
-  onStatusChange: (taskId: number) => void;
-  onClick: (task: Task) => void;
+  onStatusChange: () => void;
+  onSelect: () => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onStatusChange, onClick }) => (
-  <li onClick={() => onClick(task)}>
-    <input
-      type="checkbox"
-      checked={task.isCompleted}
-      onChange={() => onStatusChange(task.id)}
-      onClick={(e) => e.stopPropagation()}
-    />
-    {task.title}
-    {task.isFavorite && ' ⭐'}
-  </li>
-);
+const TaskItem: React.FC<TaskItemProps> = ({ task, onStatusChange, onSelect }) => {
+  return (
+    <div onClick={onSelect}>
+      <input
+        type="checkbox"
+        checked={task.isCompleted}
+        onChange={onStatusChange}
+      />
+      <span>{task.title}</span>
+    </div>
+  );
+};
 
 export default TaskItem;

@@ -1,22 +1,23 @@
-import { useFilteredTasks } from "hooks/useFilteredTasks";
-import { useTaskList } from "hooks/useTaskList";
-import FilterTasks, { TaskFilters } from "./FilterTasks";
-import { Task } from "types/task";
-import TaskListHeader from "./TaskListHeader";
-import TaskItem from "./TaskItem";
-import TaskForm from "./TaskListForm";
-import TaskDetails from "./TaskDetails";
-import { useState } from "react";
-import { useTaskOperations } from "hooks/useTaskOperations";
+import React, { useState } from 'react';
+import { useTaskListOperations } from '../hooks/useTaskListOperations';
+import { TaskFilters } from './FilterTasks';
+import { Task } from '../types/task';
+import TaskListHeader from './TaskListHeader';
+import TaskItem from './TaskItem';
+import TaskForm from './TaskListForm';
+import TaskDetails from './TaskDetails';
+import { UserDto } from '../services/backend/types';
 
 interface TaskListProps {
   listId: number;
+  filters: TaskFilters;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ listId }) => {
+const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const [filters, setFilters] = useState<TaskFilters>({ isCompleted: null, isFavorite: null, sortDescending: false });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showShareDropdown, setShowShareDropdown] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
 
   const {
     taskList,
@@ -27,46 +28,72 @@ const TaskList: React.FC<TaskListProps> = ({ listId }) => {
     tasksError,
     createTask,
     updateTaskStatus,
-    updateTaskDetails
-  } = useTaskOperations(listId, filters);
+    updateTaskDetails,
+    shareTaskList,
+    associatedUsers,
+    nonAssociatedUsers,
+    isSharing,
+    isAssociatedUsersLoading,
+    associatedUsersError,
+    isNonAssociatedUsersLoading,
+    nonAssociatedUsersError,
+  } = useTaskListOperations(listId, filters);
 
-  const filteredTasks = useFilteredTasks(tasks, filters);
+  if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
+  if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) return <div>Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
 
-  const handleFilterChange = (newFilters: TaskFilters) => {
-    setFilters(newFilters);
+  const handleShareClick = () => {
+    setShowShareDropdown(!showShareDropdown);
   };
 
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
+  const handleUserSelect = (userId: number) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
   };
 
-  if (isTaskListLoading || isTasksLoading) return <div>Loading...</div>;
-  if (taskListError || tasksError) return <div>Error loading task list: {(taskListError || tasksError).toString()}</div>;
+  const handleShareSubmit = () => {
+    shareTaskList.mutate(selectedUsers, {
+      onError: (error) => {
+        alert(`Failed to share task list: ${error.message}`);
+      },
+      onSuccess: () => {
+        setShowShareDropdown(false);
+        setSelectedUsers([]);
+      },
+    });
+  };
 
   return (
     <div>
-      <TaskListHeader name={taskList?.name || ''} />
-      <FilterTasks onFilterChange={handleFilterChange} />
-      <ul>
-        {filteredTasks?.map(task => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onStatusChange={() => updateTaskStatus.mutate(task.id)}
-            onClick={handleTaskClick}
-          />
-        ))}
-      </ul>
-      {!showNewTaskForm ? (
-        <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
-      ) : (
+      <TaskListHeader taskList={taskList} associatedUsers={associatedUsers} />
+      <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
+      <button onClick={handleShareClick}>Share Task List</button>
+      {showShareDropdown && (
+        <div>
+          <select multiple value={selectedUsers.map(String)} onChange={(e) => setSelectedUsers(Array.from(e.target.selectedOptions, option => Number(option.value)))}>
+            {nonAssociatedUsers?.map((user: UserDto) => (
+              <option key={user.userId} value={user.userId}>{user.username}</option>
+            ))}
+          </select>
+          <button onClick={handleShareSubmit} disabled={isSharing}>
+            {isSharing ? 'Sharing...' : 'Share'}
+          </button>
+        </div>
+      )}
+      {tasks.map(task => (
+        <TaskItem
+          key={task.id}
+          task={task}
+          onStatusChange={() => updateTaskStatus.mutate(task.id)}
+          onSelect={() => setSelectedTask(task)}
+        />
+      ))}
+      {showNewTaskForm && (
         <TaskForm
           onSubmit={(newTask) => {
-            createTask.mutate(newTask, {
-              onSuccess: () => {
-                setShowNewTaskForm(false);
-              }
-            });
+            createTask.mutate(newTask);
+            setShowNewTaskForm(false);
           }}
           onCancel={() => setShowNewTaskForm(false)}
         />

@@ -18,14 +18,7 @@ export interface NewTask {
   color: Color;
 }
 
-export interface UpdateTaskDetails {
-  id: number;
-  title?: string;
-  description?: string;
-  rank?: number;
-  color?: Color;
-  isFavorite?: boolean;
-}
+export type UpdateTaskDetails = Partial<Task>;
 
 export interface TaskList {
   id: number;

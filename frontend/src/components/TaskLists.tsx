@@ -1,46 +1,35 @@
 import React, { useCallback, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { genApiClient } from '../services/backend/genApiClient';
-import { TaskListDto } from '../services/backend/types';
-import TaskList from './TaskList';
-import { useApi } from '../hooks/useApi';
-
 import { useTaskOperations } from '../hooks/useTaskOperations';
-
+import TaskList from './TaskList';
+import FilterTasks, { TaskFilters } from './FilterTasks';
 
 const TaskLists: React.FC = () => {
   const [newList, setNewList] = useState({ name: '', description: '' });
-  const queryClient = useQueryClient();
-  const { apiCall } = useApi();
-
-  const { data: taskLists, isLoading, error } = useQuery<TaskListDto[]>({
-    queryKey: ['taskLists'],
-    queryFn: () => apiCall(client => client.tasks_GetUserTaskLists()),
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<TaskFilters>({
+    isCompleted: null,
+    isFavorite: null,
+    sortBy: undefined,
+    sortDescending: false,
   });
-
-  const createListMutation = useMutation({
-    mutationFn: (list: { name: string; description: string }) => 
-      apiCall(client => client.tasks_CreateTaskList(list)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
-    },
-  });
+  const { taskLists, isTaskListsLoading, taskListsError, createTaskList } = useTaskOperations();
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    createListMutation.mutate(newList, {
+    createTaskList.mutate(newList, {
       onSuccess: () => {
         setNewList({ name: '', description: '' });
       }
     });
-  }, [createListMutation, newList]);
+  }, [createTaskList, newList]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.toString()}</div>;
+  if (isTaskListsLoading) return <div>Loading...</div>;
+  if (taskListsError) return <div>Error: {taskListsError.toString()}</div>;
 
   return (
     <div>
       <h1>Task Lists</h1>
+      <FilterTasks onFilterChange={setFilters} />
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -57,9 +46,14 @@ const TaskLists: React.FC = () => {
         />
         <button type="submit">Create New List</button>
       </form>
-      {taskLists?.map(list => (
-        <TaskList key={list.id} listId={list.id} />
-      ))}
+      <ul>
+        {taskLists?.map(list => (
+          <li key={list.id} onClick={() => setSelectedListId(list.id)}>
+            {list.name}
+          </li>
+        ))}
+      </ul>
+      {selectedListId && <TaskList listId={selectedListId} filters={filters} />}
     </div>
   );
 };
