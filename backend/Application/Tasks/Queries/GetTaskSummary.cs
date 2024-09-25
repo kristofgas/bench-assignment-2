@@ -5,40 +5,43 @@ using Application.Tasks.Dto;
 using Application.Common.Security;
 using Application.Common.Security.Attributes;
 
-namespace Application.Tasks.Queries.GetTaskSummary
-{
-    [Authorize]
-    public class GetTaskSummaryQuery : IRequest<TaskSummaryDto>
-    {
-    }
 
-    public class GetTaskSummaryQueryHandler : IRequestHandler<GetTaskSummaryQuery, TaskSummaryDto>
+    namespace Application.Tasks.Queries.GetTaskSummary
     {
-        private readonly IApplicationDbContext _context;
-        private readonly ICurrentUserService _currentUserService;
-
-        public GetTaskSummaryQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        [Authorize]
+        public class GetTaskSummaryQuery : IRequest<TaskSummaryDto>
         {
-            _context = context;
-            _currentUserService = currentUserService;
+            public int TaskListId { get; set; }
         }
 
-        public async Task<TaskSummaryDto> Handle(GetTaskSummaryQuery request, CancellationToken cancellationToken)
+        public class GetTaskSummaryQueryHandler : IRequestHandler<GetTaskSummaryQuery, TaskSummaryDto>
         {
-            var currentUserId = int.Parse(_currentUserService.UserId!);
+            private readonly IApplicationDbContext _context;
+            private readonly ICurrentUserService _currentUserService;
 
-            var summary = await _context.Tasks
-    .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
-                && !t.User!.IsDeleted)
-    .GroupBy(t => 1)
-    .Select(g => new TaskSummaryDto
-    {
-        TotalTasks = g.Count(),
-        CompletedTasks = g.Sum(t => t.IsCompleted ? 1 : 0)
-    })
-    .FirstOrDefaultAsync(cancellationToken);
+            public GetTaskSummaryQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+            {
+                _context = context;
+                _currentUserService = currentUserService;
+            }
 
-            return summary ?? new TaskSummaryDto();
+            public async Task<TaskSummaryDto> Handle(GetTaskSummaryQuery request, CancellationToken cancellationToken)
+            {
+                var currentUserId = int.Parse(_currentUserService.UserId!);
+
+                var summary = await _context.Tasks
+                    .Where(t => t.TaskListId == request.TaskListId)
+                    .Where(t => (t.UserId == currentUserId || t.TaskList.UserTaskLists.Any(utl => utl.UserId == currentUserId && !utl.IsDeleted))
+                                && !t.User!.IsDeleted)
+                    .GroupBy(t => 1)
+                    .Select(g => new TaskSummaryDto
+                    {
+                        TotalTasks = g.Count(),
+                        CompletedTasks = g.Sum(t => t.IsCompleted ? 1 : 0)
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                return summary ?? new TaskSummaryDto();
+            }
         }
     }
-}

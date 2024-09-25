@@ -555,8 +555,11 @@ export class ApiFetchClient extends ClientBase {
         return Promise.resolve<FileResponse>(null as any);
     }
 
-    tasks_GetTaskSummary(signal?: AbortSignal | undefined): Promise<TaskSummaryDto> {
-        let url_ = this.baseUrl + "/api/Tasks/summary";
+    tasks_GetTaskSummary(taskListId: number, signal?: AbortSignal | undefined): Promise<TaskSummaryDto> {
+        let url_ = this.baseUrl + "/api/Tasks/lists/{taskListId}/summary";
+        if (taskListId === undefined || taskListId === null)
+            throw new Error("The parameter 'taskListId' must be defined.");
+        url_ = url_.replace("{taskListId}", encodeURIComponent("" + taskListId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {

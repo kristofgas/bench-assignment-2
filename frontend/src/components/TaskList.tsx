@@ -37,6 +37,9 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     associatedUsersError,
     isNonAssociatedUsersLoading,
     nonAssociatedUsersError,
+    taskSummary,
+    isTaskSummaryLoading,
+    taskSummaryError,
   } = useTaskListOperations(listId, filters);
 
   if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
@@ -66,7 +69,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
 
   return (
     <div>
-      <TaskListHeader taskList={taskList} associatedUsers={associatedUsers} />
+      <TaskListHeader taskList={taskList} associatedUsers={associatedUsers} taskSummary={taskSummary} />
       <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
       <button onClick={handleShareClick}>Share Task List</button>
       {showShareDropdown && (

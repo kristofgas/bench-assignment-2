@@ -3,7 +3,7 @@ import { useApi } from './useApi';
 import { Task, NewTask, UpdateTaskDetails, TaskList } from '../types/task';
 import { Color, getRankValue } from '../utils/taskUtils';
 import { TaskFilters } from 'components/FilterTasks';
-import { TaskDto, TaskListDto, UserDto } from '../services/backend/types';
+import { TaskDto, TaskListDto, TaskSummaryDto, UserDto } from '../services/backend/types';
 import { useMemo, useState } from 'react';
 
 export function useTaskListOperations(listId: number, filters: TaskFilters) {
@@ -113,6 +113,11 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     }
   });
 
+  const { data: taskSummary, isLoading: isTaskSummaryLoading, error: taskSummaryError } = useQuery<TaskSummaryDto, Error>({
+    queryKey: ['taskSummary', listId],
+    queryFn: () => apiCall(client => client.tasks_GetTaskSummary(listId)),
+  });
+
   return {
     taskList,
     isTaskListLoading,
@@ -131,5 +136,8 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     nonAssociatedUsersError,
     shareTaskList,
     isSharing,
+    taskSummary,
+    isTaskSummaryLoading,
+    taskSummaryError,
   };
 }

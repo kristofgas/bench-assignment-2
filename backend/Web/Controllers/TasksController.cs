@@ -21,6 +21,7 @@ using Application.TaskLists.Queries.GetUserTaskLists;
 using Application.Users.Dto;
 using Application.Users.Queries.GetUsersByTaskListAssociation;
 
+
 namespace Web.Controllers
 {
     [Authorize]
@@ -120,10 +121,10 @@ namespace Web.Controllers
             return NoContent();
         }
 
-        [HttpGet("summary")]
-        public async Task<ActionResult<TaskSummaryDto>> GetTaskSummary()
+        [HttpGet("lists/{taskListId}/summary")]
+        public async Task<ActionResult<TaskSummaryDto>> GetTaskSummary(int taskListId)
         {
-            return await Mediator.Send(new GetTaskSummaryQuery());
+            return await Mediator.Send(new GetTaskSummaryQuery { TaskListId = taskListId });
         }
 
         [HttpDelete("clear-completed")]
