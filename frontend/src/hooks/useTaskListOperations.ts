@@ -18,6 +18,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
       id: data.id ?? 0,
       name: data.name ?? '',
       description: data.description ?? '',
+      createdBy: data.createdBy ?? null,
     }),
   });
 
@@ -40,6 +41,9 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
         isCompleted: task.isCompleted ?? false,
         isFavorite: task.isFavorite ?? false,
         taskListId: task.taskListId ?? 0,
+        createdBy: task.createdBy ?? null,
+        lastModified: task.lastModified ?? null,
+        lastModifiedBy: task.lastModifiedBy ?? null,
       }));
 
       return mappedTasks.sort((a, b) => {
@@ -88,7 +92,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     queryKey: ['associatedUsers', listId],
     queryFn: () => apiCall(client => client.tasks_GetUsersByTaskListAssociation(listId, true)),
   });
-  
+
   const { data: nonAssociatedUsers, isLoading: isNonAssociatedUsersLoading, error: nonAssociatedUsersError } = useQuery<UserDto[]>({
     queryKey: ['nonAssociatedUsers', listId],
     queryFn: () => apiCall(client => client.tasks_GetUsersByTaskListAssociation(listId, false)),

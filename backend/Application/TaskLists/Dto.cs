@@ -6,5 +6,6 @@
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public List<int> UserIds { get; set; } = new List<int>();
+        public string? CreatedBy { get; set; }
     }
 }

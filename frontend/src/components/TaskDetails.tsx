@@ -95,6 +95,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, onClose, onUpdate }) =>
         <button type="submit">Save Changes</button>
         <button type="button" onClick={onClose}>Cancel</button>
       </form>
+      <div>
+        <p>Created by: {task.createdBy}</p>
+        <p>Last modified: {task.lastModified}</p>
+        <p>Last modified by: {task.lastModifiedBy}</p>
+      </div>
     </div>
   );
 };

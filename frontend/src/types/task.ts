@@ -9,6 +9,9 @@ export interface Task {
   isCompleted: boolean;
   isFavorite: boolean;
   taskListId: number;
+  createdBy?: string | null;
+  lastModified?: string | null;
+  lastModifiedBy?: string | null;
 }
 
 export interface NewTask {
@@ -24,6 +27,7 @@ export interface TaskList {
   id: number;
   name: string;
   description: string;
+  createdBy?: string | null;
 }
 
 export interface NewTaskList {

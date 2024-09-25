@@ -11,6 +11,9 @@
         public int Rank { get; set; }
         public string Color { get; set; } = string.Empty;
         public bool IsFavorite { get; set; }
+        public string? CreatedBy { get; set; }
+        public DateTimeOffset? LastModified { get; set; }
+        public string? LastModifiedBy { get; set; }
     }
 
     public class TaskSummaryDto

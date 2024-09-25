@@ -22,8 +22,6 @@ namespace Application.Tasks.Queries.GetTasksByState
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
 
-
-
         public GetTasksByStateQueryHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
         {
             _context = context;
@@ -55,18 +53,24 @@ namespace Application.Tasks.Queries.GetTasksByState
             }
 
             return await query.Select(t => new TaskDto
-            {
-                Id = t.Id,
-                Title = t.Title,
-                Description = t.Description,
-                IsCompleted = t.IsCompleted,
-                TaskListId = t.TaskListId,
-                UserIds = t.TaskList.UserTaskLists.Select(utl => utl.UserId).ToList(),
-                Rank = t.Rank,
-                Color = t.Color,
-                IsFavorite = t.IsFavorite
-            })
-            .ToListAsync(cancellationToken);
+            
+                {
+                    Id = t.Id,
+                    Title = t.Title,
+                    Description = t.Description,
+                    IsCompleted = t.IsCompleted,
+                    TaskListId = t.TaskListId,
+                    UserIds = t.TaskList.UserTaskLists.Select(utl => utl.UserId).ToList(),
+                    Rank = t.Rank,
+                    Color = t.Color,
+                    IsFavorite = t.IsFavorite,
+                    CreatedBy = t.CreatedBy,
+                    LastModified = t.LastModified,
+                    LastModifiedBy = t.LastModifiedBy
+                })
+                .ToListAsync(cancellationToken);
+
+    
         }
     }
 }

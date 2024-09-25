@@ -54,7 +54,10 @@ namespace Application.Tasks.Queries.GetTask
                 UserIds = task.TaskList.UserTaskLists.Select(utl => utl.UserId).ToList(),
                 Rank = task.Rank,
                 Color = task.Color,
-                IsFavorite = task.IsFavorite
+                IsFavorite = task.IsFavorite,
+                CreatedBy = task.CreatedBy,
+                LastModified = task.LastModified,
+                LastModifiedBy = task.LastModifiedBy
             };
         }
     }

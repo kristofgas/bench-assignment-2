@@ -34,7 +34,8 @@ namespace Application.TaskLists.Queries.GetUserTaskLists
                     Id = tl.Id,
                     Name = tl.Name,
                     Description = tl.Description,
-                    UserIds = tl.UserTaskLists.Where(utl => !utl.IsDeleted).Select(utl => utl.UserId).ToList()
+                    UserIds = tl.UserTaskLists.Where(utl => !utl.IsDeleted).Select(utl => utl.UserId).ToList(),
+                    CreatedBy = tl.CreatedBy
                 })
                 .ToListAsync(cancellationToken);
 

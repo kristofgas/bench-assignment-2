@@ -61,7 +61,8 @@ namespace Application.TaskLists.Commands.UpdateTaskList
                 Id = taskList.Id,
                 Name = taskList.Name,
                 Description = taskList.Description,
-                UserIds = taskList.UserTaskLists.Select(utl => utl.UserId).ToList()
+                UserIds = taskList.UserTaskLists.Select(utl => utl.UserId).ToList(),
+                CreatedBy = taskList.CreatedBy
             };
         }
     }

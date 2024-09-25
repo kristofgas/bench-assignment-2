@@ -12,6 +12,7 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = ({ taskList, associatedUse
     <div>
       <h2>{taskList.name}</h2>
       <p>{taskList.description}</p>
+      {taskList.createdBy && <p>Created by: {taskList.createdBy}</p>}
       {associatedUsers && associatedUsers.length > 0 && (
         <div>
           <h3>Shared with:</h3>

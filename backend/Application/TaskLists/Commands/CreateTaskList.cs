@@ -6,6 +6,7 @@ using Application.Common.Exceptions;
 using Domain.Entities;
 using Application.Common.Security.Attributes;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 
 namespace Application.TaskLists.Commands.CreateTaskList
@@ -53,7 +54,8 @@ namespace Application.TaskLists.Commands.CreateTaskList
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
-                UserIds = new List<int> { request.UserId }
+                UserIds = new List<int> { request.UserId },
+                CreatedBy = entity.CreatedBy
             };
         }
     }

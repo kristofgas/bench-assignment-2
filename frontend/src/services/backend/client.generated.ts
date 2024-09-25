@@ -1343,6 +1343,7 @@ export interface TaskListDto {
     name?: string;
     description?: string | null;
     userIds?: number[];
+    createdBy?: string | null;
 }
 
 export interface CreateTaskListCommand {
@@ -1361,6 +1362,9 @@ export interface TaskDto {
     rank?: number;
     color?: string;
     isFavorite?: boolean;
+    createdBy?: string | null;
+    lastModified?: string | null;
+    lastModifiedBy?: string | null;
 }
 
 export interface CreateTaskCommand {
