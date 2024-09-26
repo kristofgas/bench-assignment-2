@@ -77,14 +77,23 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
+      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
     },
   });
 
   const updateTaskDetails = useMutation({
     mutationFn: (updatedTask: UpdateTaskDetails) => 
-      apiCall(client => client.tasks_UpdateTaskDetails(updatedTask.id, updatedTask)),
+      apiCall(client => client.tasks_UpdateTaskDetails(updatedTask.id!, {
+        id: updatedTask.id,
+        title: updatedTask.title,
+        description: updatedTask.description,
+        rank: updatedTask.rank,
+        color: updatedTask.color,
+        isFavorite: updatedTask.isFavorite
+      })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
+      queryClient.invalidateQueries({ queryKey: ['taskList', listId] });
     },
   });
 
@@ -118,6 +127,14 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     queryFn: () => apiCall(client => client.tasks_GetTaskSummary(listId)),
   });
 
+  const clearCompletedTasks = useMutation({
+    mutationFn: () => apiCall(client => client.tasks_ClearCompletedTasks(listId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
+      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
+    },
+  });
+
   return {
     taskList,
     isTaskListLoading,
@@ -139,5 +156,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     taskSummary,
     isTaskSummaryLoading,
     taskSummaryError,
+    clearCompletedTasks,
+
   };
 }

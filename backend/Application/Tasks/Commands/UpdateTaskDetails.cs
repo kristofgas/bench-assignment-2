@@ -10,6 +10,8 @@ namespace Application.Tasks.Commands.UpdateTaskDetails
     public class UpdateTaskDetailsCommand : IRequest
     {
         public int Id { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
         public int? Rank { get; set; }
         public string? Color { get; set; }
         public bool? IsFavorite { get; set; }
@@ -61,6 +63,16 @@ namespace Application.Tasks.Commands.UpdateTaskDetails
             if (request.IsFavorite.HasValue)
             {
                 task.IsFavorite = request.IsFavorite.Value;
+            }
+
+            if (request.Title != null)
+            {
+                task.Title = request.Title;
+            }
+
+            if (request.Description != null)
+            {
+                task.Description = request.Description;
             }
 
             await _context.SaveChangesAsync(cancellationToken);

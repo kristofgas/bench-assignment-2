@@ -127,10 +127,10 @@ namespace Web.Controllers
             return await Mediator.Send(new GetTaskSummaryQuery { TaskListId = taskListId });
         }
 
-        [HttpDelete("clear-completed")]
-        public async Task<ActionResult> ClearCompletedTasks()
+        [HttpDelete("lists/{taskListId}/clear-completed")]
+        public async Task<ActionResult> ClearCompletedTasks(int taskListId)
         {
-            await Mediator.Send(new ClearCompletedTasksCommand());
+            await Mediator.Send(new ClearCompletedTasksCommand { TaskListId = taskListId });
             return NoContent();
         }
 

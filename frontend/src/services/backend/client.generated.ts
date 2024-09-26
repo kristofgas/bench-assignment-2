@@ -594,8 +594,11 @@ export class ApiFetchClient extends ClientBase {
         return Promise.resolve<TaskSummaryDto>(null as any);
     }
 
-    tasks_ClearCompletedTasks(signal?: AbortSignal | undefined): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/api/Tasks/clear-completed";
+    tasks_ClearCompletedTasks(taskListId: number, signal?: AbortSignal | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Tasks/lists/{taskListId}/clear-completed";
+        if (taskListId === undefined || taskListId === null)
+            throw new Error("The parameter 'taskListId' must be defined.");
+        url_ = url_.replace("{taskListId}", encodeURIComponent("" + taskListId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -1398,6 +1401,8 @@ export interface TaskSummaryDto {
 
 export interface UpdateTaskDetailsCommand {
     id?: number;
+    title?: string | null;
+    description?: string | null;
     rank?: number | null;
     color?: string | null;
     isFavorite?: boolean | null;
@@ -1583,6 +1588,7 @@ export enum Scope {
 }
 
 export interface FileResponse {
+    id: number;
     data: Blob;
     status: number;
     fileName?: string;

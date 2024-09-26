@@ -6,9 +6,10 @@ interface TaskListHeaderProps {
   taskList: TaskList;
   associatedUsers?: UserDto[];
   taskSummary?: TaskSummaryDto;
+  onClearCompletedTasks: () => void;
 }
 
-const TaskListHeader: React.FC<TaskListHeaderProps> = ({ taskList, associatedUsers, taskSummary }) => {
+const TaskListHeader: React.FC<TaskListHeaderProps> = ({ taskList, associatedUsers, taskSummary, onClearCompletedTasks }) => {
   return (
     <div>
       <h2>{taskList.name}</h2>
@@ -16,8 +17,10 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = ({ taskList, associatedUse
       {taskList.createdBy && <p>Created by: {taskList.createdBy}</p>}
       {taskSummary && (
         <div>
-          <p>Total Tasks: {taskSummary.totalTasks}</p>
-          <p>Completed Tasks: {taskSummary.completedTasks}</p>
+          <p>Tasks: {taskSummary.completedTasks} / {taskSummary.totalTasks} completed</p>
+          <button onClick={onClearCompletedTasks} disabled={taskSummary.completedTasks === 0}>
+            Clear Completed Tasks
+          </button>
         </div>
       )}
       {associatedUsers && associatedUsers.length > 0 && (

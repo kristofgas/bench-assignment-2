@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useTaskListOperations } from '../hooks/useTaskListOperations';
 import { TaskFilters } from './FilterTasks';
-import { Task } from '../types/task';
+import { Task, UpdateTaskDetails } from '../types/task';
 import TaskListHeader from './TaskListHeader';
 import TaskItem from './TaskItem';
 import TaskForm from './TaskListForm';
 import TaskDetails from './TaskDetails';
 import { UserDto } from '../services/backend/types';
+import { Priority, getRankValue } from 'utils/taskUtils';
 
 interface TaskListProps {
   listId: number;
@@ -15,6 +16,7 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -40,6 +42,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     taskSummary,
     isTaskSummaryLoading,
     taskSummaryError,
+    clearCompletedTasks,
   } = useTaskListOperations(listId, filters);
 
   if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
@@ -67,9 +70,24 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     });
   };
 
+  const handleTaskUpdate = (updatedTask: UpdateTaskDetails) => {
+    updateTaskDetails.mutate(updatedTask, {
+      onSuccess: () => {
+        setEditingTask(null);
+        //setSelectedTask(null);
+      },
+    });
+  };
+  
+
   return (
     <div>
-      <TaskListHeader taskList={taskList} associatedUsers={associatedUsers} taskSummary={taskSummary} />
+      <TaskListHeader
+        taskList={taskList}
+        associatedUsers={associatedUsers}
+        taskSummary={taskSummary}
+        onClearCompletedTasks={() => clearCompletedTasks.mutate()}
+      />
       <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
       <button onClick={handleShareClick}>Share Task List</button>
       {showShareDropdown && (
@@ -89,6 +107,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
           key={task.id}
           task={task}
           onStatusChange={() => updateTaskStatus.mutate(task.id)}
+          onEdit={() => setEditingTask(task)}
           onSelect={() => setSelectedTask(task)}
         />
       ))}
@@ -101,12 +120,26 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
           onCancel={() => setShowNewTaskForm(false)}
         />
       )}
-      {selectedTask && (
+      {editingTask && (
         <TaskDetails
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-          onUpdate={(updatedTask) => updateTaskDetails.mutate(updatedTask)}
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+          onUpdate={handleTaskUpdate}
         />
+      )}
+      {selectedTask && !editingTask && (
+        <div>
+          <h3>Task Details</h3>
+          <p>Title: {selectedTask.title}</p>
+          <p>Description: {selectedTask.description}</p>
+          <p>Priority: {selectedTask.rank}</p>
+          <p>Color: {selectedTask.color}</p>
+          <p>Favorite: {selectedTask.isFavorite ? 'Yes' : 'No'}</p>
+          <p>Created by: {selectedTask.createdBy}</p>
+          <p>Last modified: {selectedTask.lastModified}</p>
+          <p>Last modified by: {selectedTask.lastModifiedBy}</p>
+          <button onClick={() => setSelectedTask(null)}>Close</button>
+        </div>
       )}
     </div>
   );

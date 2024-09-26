@@ -32,8 +32,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, onClose, onUpdate }) =>
       ...formData,
       rank: getRankValue(formData.rank as Priority),
     });
-    onClose();
-  }, [formData, task.id, onUpdate, onClose]);
+  }, [formData, task.id, onUpdate]);
 
   return (
     <div className="task-details">
