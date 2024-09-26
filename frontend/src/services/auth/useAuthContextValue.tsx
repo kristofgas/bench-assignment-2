@@ -15,17 +15,20 @@ type AuthHook = {
   logout: () => void;
   activeUser: LoginResult | null;
   checkAuth: () => Promise<void>;
+  token: string | null; // Add this line
 };
 
 export const useAuthContextValue = (): AuthHook => {
   const [authStage, setAuthStage] = useState<AuthStage>(AuthStage.UNAUTHENTICATED);
   const [activeUser, setActiveUser] = useState<LoginResult | null>(null);
+  const [token, setTokenState] = useState<string | null>(null); // Add this line
 
   const checkAuth = useCallback(async () => {
     setAuthStage(AuthStage.CHECKING);
     const token = localStorage.getItem('jwtToken');
     if (token) {
       setToken(token);
+      setTokenState(token); // Add this line
       setAuthStage(AuthStage.AUTHENTICATED);
     } else {
       setAuthStage(AuthStage.UNAUTHENTICATED);
@@ -36,9 +39,10 @@ export const useAuthContextValue = (): AuthHook => {
     const client = await genApiClient();
     try {
       const response = await client.users_Login({ username, password });
-      console.log('Login response:', response);
+      console.log('Login response:', response); // Debugging statement
       if (response && response.token) {
         setToken(response.token);
+        setTokenState(response.token);
         setActiveUser(response);
         setAuthStage(AuthStage.AUTHENTICATED);
         return true;
@@ -70,5 +74,5 @@ export const useAuthContextValue = (): AuthHook => {
     setAuthStage(AuthStage.UNAUTHENTICATED);
   }, []);
 
-  return { authStage, login, register, logout, activeUser, checkAuth };
+  return { authStage, login, register, logout, activeUser, checkAuth, token }; // Add token here
 };

@@ -4,6 +4,8 @@ using Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Application.Users.Commands.DeleteUser;
+using Application.Users.Dto;
+using Application.Users.Queries.GetAllUsers;
 
 namespace Web.Controllers
 {
@@ -30,6 +32,13 @@ namespace Web.Controllers
         {
             await Mediator.Send(new DeleteUserCommand { UserId = id });
             return NoContent();
+        }
+
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<UserDto>>> GetAllUsers()
+        {
+            return await Mediator.Send(new GetAllUsersQuery());
         }
 
         // Other methods...
