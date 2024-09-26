@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Task, UpdateTaskDetails } from '../types/task';
 import { priorityOptions, colorOptions, getPriorityFromRank, getRankValue, Color, Priority } from '../utils/taskUtils';
 
@@ -16,6 +16,16 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, onClose, onUpdate }) =>
     color: task.color,
     isFavorite: task.isFavorite
   });
+
+  useEffect(() => {
+    setFormData({
+      title: task.title,
+      description: task.description,
+      rank: getPriorityFromRank(task.rank),
+      color: task.color,
+      isFavorite: task.isFavorite
+    });
+  }, [task]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

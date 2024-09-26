@@ -23,6 +23,10 @@ const TaskLists: React.FC = () => {
     });
   }, [createTaskList, newList]);
 
+  const handleListSelect = (listId: number) => {
+    setSelectedListId(listId);
+  };
+
   if (isTaskListsLoading) return <div>Loading...</div>;
   if (taskListsError) return <div>Error: {taskListsError.toString()}</div>;
 
@@ -48,7 +52,7 @@ const TaskLists: React.FC = () => {
       </form>
       <ul>
         {taskLists?.map(list => (
-          <li key={list.id} onClick={() => setSelectedListId(list.id)}>
+          <li key={list.id} onClick={() => handleListSelect(list.id)}>
             {list.name}
           </li>
         ))}

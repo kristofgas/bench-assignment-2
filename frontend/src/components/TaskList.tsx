@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskListOperations } from '../hooks/useTaskListOperations';
 import { TaskFilters } from './FilterTasks';
 import { Task, UpdateTaskDetails } from '../types/task';
@@ -45,6 +45,10 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     clearCompletedTasks,
   } = useTaskListOperations(listId, filters);
 
+  useEffect(() => {
+    setSelectedTask(null);
+  }, [listId]);
+
   if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
   if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) return <div>Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
 
@@ -74,11 +78,15 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     updateTaskDetails.mutate(updatedTask, {
       onSuccess: () => {
         setEditingTask(null);
-        //setSelectedTask(null);
+        // Update the task in the local state
+        setSelectedTask(prev => prev && prev.id === updatedTask.id ? { ...prev, ...updatedTask } : prev);
       },
     });
   };
-  
+
+  const handleTaskSelect = (task: Task) => {
+    setSelectedTask(prev => (prev && prev.id === task.id ? null : task));
+  };
 
   return (
     <div>
@@ -108,7 +116,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
           task={task}
           onStatusChange={() => updateTaskStatus.mutate(task.id)}
           onEdit={() => setEditingTask(task)}
-          onSelect={() => setSelectedTask(task)}
+          onSelect={() => handleTaskSelect(task)}
         />
       ))}
       {showNewTaskForm && (
