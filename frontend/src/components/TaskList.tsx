@@ -3,11 +3,10 @@ import { useTaskListOperations } from '../hooks/useTaskListOperations';
 import { TaskFilters } from './FilterTasks';
 import { Task, UpdateTaskDetails } from '../types/task';
 import TaskListHeader from './TaskListHeader';
-import TaskItem from './TaskItem';
-import TaskForm from './TaskListForm';
-import TaskDetails from './TaskDetails';
-import { UserDto } from '../services/backend/types';
-import { Priority, getRankValue } from 'utils/taskUtils';
+import TaskForm from './TaskForm';
+import TaskListShare from './TaskListShare';
+import TaskListTasks from './TaskListTasks';
+import TaskListDetails from './TaskListDetails';
 
 interface TaskListProps {
   listId: number;
@@ -40,8 +39,6 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     isNonAssociatedUsersLoading,
     nonAssociatedUsersError,
     taskSummary,
-    isTaskSummaryLoading,
-    taskSummaryError,
     clearCompletedTasks,
   } = useTaskListOperations(listId, filters);
 
@@ -99,26 +96,18 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
       <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
       <button onClick={handleShareClick}>Share Task List</button>
       {showShareDropdown && (
-        <div>
-          <select multiple value={selectedUsers.map(String)} onChange={(e) => setSelectedUsers(Array.from(e.target.selectedOptions, option => Number(option.value)))}>
-            {nonAssociatedUsers?.map((user: UserDto) => (
-              <option key={user.userId} value={user.userId}>{user.username}</option>
-            ))}
-          </select>
-          <button onClick={handleShareSubmit} disabled={isSharing}>
-            {isSharing ? 'Sharing...' : 'Share'}
-          </button>
-        </div>
-      )}
-      {tasks.map(task => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onStatusChange={() => updateTaskStatus.mutate(task.id)}
-          onEdit={() => setEditingTask(task)}
-          onSelect={() => handleTaskSelect(task)}
+        <TaskListShare
+          nonAssociatedUsers={nonAssociatedUsers}
+          onShare={handleShareSubmit}
+          isSharing={isSharing}
         />
-      ))}
+      )}
+      <TaskListTasks
+        tasks={tasks}
+        onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
+        onEdit={(task) => setEditingTask(task)}
+        onSelect={(task) => handleTaskSelect(task)}
+      />
       {showNewTaskForm && (
         <TaskForm
           onSubmit={(newTask) => {
@@ -128,13 +117,11 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
           onCancel={() => setShowNewTaskForm(false)}
         />
       )}
-      {editingTask && (
-        <TaskDetails
-          task={editingTask}
-          onClose={() => setEditingTask(null)}
-          onUpdate={handleTaskUpdate}
-        />
-      )}
+      <TaskListDetails
+        editingTask={editingTask}
+        onClose={() => setEditingTask(null)}
+        onUpdate={handleTaskUpdate}
+      />
       {selectedTask && !editingTask && (
         <div>
           <h3>Task Details</h3>
