@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../services/auth/useAuth';
+import { useAuth } from '../../services/auth/useAuth';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');

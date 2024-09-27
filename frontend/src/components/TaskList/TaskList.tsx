@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useTaskListOperations } from '../hooks/useTaskListOperations';
-import { TaskFilters } from './FilterTasks';
-import { Task, UpdateTaskDetails } from '../types/task';
+import { useTaskListOperations } from '../../hooks/useTaskListOperations';
+import { useTaskSelection } from '../../hooks/useTaskSelection';
+import { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskListHeader from './TaskListHeader';
-import TaskForm from './TaskForm';
+import TaskForm from '../Task/TaskForm';
 import TaskListShare from './TaskListShare';
 import TaskListTasks from './TaskListTasks';
 import TaskListDetails from './TaskListDetails';
+import SelectedTaskDetails from 'components/Task/SelectedTaskDetails';
+import { draftMode } from 'next/dist/client/components/headers';
+
 
 interface TaskListProps {
   listId: number;
@@ -15,10 +18,22 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+
+  const {
+    selectedTask,
+    setSelectedTask,
+    editingTask,
+    setEditingTask,
+    handleTaskSelect: handleTaskSelectHook,
+    handleTaskEdit,
+    handleShareClick,
+    handleShareSubmit,
+    handleTaskUpdate,
+    handleUserSelect,
+  } = useTaskSelection();
+
 
   const {
     taskList,
@@ -44,46 +59,10 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
 
   useEffect(() => {
     setSelectedTask(null);
-  }, [listId]);
+  }, [listId, setSelectedTask]);
 
   if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
   if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) return <div>Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
-
-  const handleShareClick = () => {
-    setShowShareDropdown(!showShareDropdown);
-  };
-
-  const handleUserSelect = (userId: number) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-    );
-  };
-
-  const handleShareSubmit = () => {
-    shareTaskList.mutate(selectedUsers, {
-      onError: (error) => {
-        alert(`Failed to share task list: ${error.message}`);
-      },
-      onSuccess: () => {
-        setShowShareDropdown(false);
-        setSelectedUsers([]);
-      },
-    });
-  };
-
-  const handleTaskUpdate = (updatedTask: UpdateTaskDetails) => {
-    updateTaskDetails.mutate(updatedTask, {
-      onSuccess: () => {
-        setEditingTask(null);
-        // Update the task in the local state
-        setSelectedTask(prev => prev && prev.id === updatedTask.id ? { ...prev, ...updatedTask } : prev);
-      },
-    });
-  };
-
-  const handleTaskSelect = (task: Task) => {
-    setSelectedTask(prev => (prev && prev.id === task.id ? null : task));
-  };
 
   return (
     <div>
@@ -94,20 +73,22 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
         onClearCompletedTasks={() => clearCompletedTasks.mutate()}
       />
       <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
-      <button onClick={handleShareClick}>Share Task List</button>
+      <button onClick={() => handleShareClick(setShowShareDropdown)}>Share Task List</button>
       {showShareDropdown && (
         <TaskListShare
           nonAssociatedUsers={nonAssociatedUsers}
-          onShare={handleShareSubmit}
+          onShare={() => handleShareSubmit(shareTaskList, selectedUsers, setShowShareDropdown, setSelectedUsers)}
           isSharing={isSharing}
+          onUserSelect={(userId) => handleUserSelect(userId, setSelectedUsers)}
+          selectedUsers={selectedUsers}
         />
       )}
       <TaskListTasks
-        tasks={tasks}
-        onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
-        onEdit={(task) => setEditingTask(task)}
-        onSelect={(task) => handleTaskSelect(task)}
-      />
+  tasks={tasks}
+  onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
+  onEdit={handleTaskEdit}
+  onSelect={(task) => handleTaskSelectHook(task, setSelectedTask)}
+/>
       {showNewTaskForm && (
         <TaskForm
           onSubmit={(newTask) => {
@@ -120,21 +101,13 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
       <TaskListDetails
         editingTask={editingTask}
         onClose={() => setEditingTask(null)}
-        onUpdate={handleTaskUpdate}
+        onUpdate={(updatedTask) => handleTaskUpdate(updateTaskDetails, updatedTask, setEditingTask, setSelectedTask)}
       />
       {selectedTask && !editingTask && (
-        <div>
-          <h3>Task Details</h3>
-          <p>Title: {selectedTask.title}</p>
-          <p>Description: {selectedTask.description}</p>
-          <p>Priority: {selectedTask.rank}</p>
-          <p>Color: {selectedTask.color}</p>
-          <p>Favorite: {selectedTask.isFavorite ? 'Yes' : 'No'}</p>
-          <p>Created by: {selectedTask.createdBy}</p>
-          <p>Last modified: {selectedTask.lastModified}</p>
-          <p>Last modified by: {selectedTask.lastModifiedBy}</p>
-          <button onClick={() => setSelectedTask(null)}>Close</button>
-        </div>
+        <SelectedTaskDetails
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
       )}
     </div>
   );

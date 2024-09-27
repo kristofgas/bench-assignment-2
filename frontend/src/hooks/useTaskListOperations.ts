@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Task, NewTask, UpdateTaskDetails, TaskList } from '../types/task';
 import { Color, getRankValue } from '../utils/taskUtils';
-import { TaskFilters } from 'components/FilterTasks';
+import { TaskFilters } from 'components/FilterTasks/FilterTasks';
 import { TaskDto, TaskListDto, TaskSummaryDto, UserDto } from '../services/backend/types';
 import { useMemo, useState } from 'react';
 

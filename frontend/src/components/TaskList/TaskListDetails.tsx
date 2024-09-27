@@ -1,6 +1,6 @@
 import React from 'react';
-import TaskDetails from './TaskDetails';
-import { Task, UpdateTaskDetails } from '../types/task';
+import TaskDetails from '../Task/TaskDetails';
+import { Task, UpdateTaskDetails } from '../../types/task';
 
 interface TaskListDetailsProps {
   editingTask: Task | null;

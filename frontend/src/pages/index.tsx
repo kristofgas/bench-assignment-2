@@ -1,33 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import Login from '../components/Login';
-import Register from '../components/Register';
-import { useAuth } from '../services/auth/useAuth';
-import { AuthStage } from '../services/auth/useAuthContextValue';
-import TaskLists from '../components/TaskLists';
-import AdminPanel from '../components/AdminPanel';
-import { getRoleFromToken } from '../utils/authUtils';
+import React, { useState } from 'react';
+import Login from '../components/Auth/Login';
+
+import TaskLists from '../components/TaskLists/TaskLists';
+
 import { useRouter } from 'next/router';
+import { useAuthStatus } from '../hooks/useAuthStatus';
+import { useUserRole } from '../hooks/useUserRole';
+import Register from 'components/Auth/Register';
+import AdminPanel from 'components/AdminPanel/AdminPanel';
 
 const HomePage: React.FC = () => {
-  const { authStage, token, logout } = useAuth();
+  const { isAuthenticated, token, logout, authStage } = useAuthStatus();
+  const { isAdmin } = useUserRole(token);
   const [showRegister, setShowRegister] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    if (token) {
-      const role = getRoleFromToken(token);
-      console.log('User role:', role); // Debugging statement
-      setIsAdmin(role === 'Admin');
-    }
-  }, [token]);
 
   const handleLogout = () => {
     logout();
     router.push('/');
   };
-  
-  if (authStage === AuthStage.UNAUTHENTICATED) {
+
+  if (!isAuthenticated) {
     return (
       <div>
         {showRegister ? <Register /> : <Login />}

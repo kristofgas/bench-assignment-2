@@ -1,5 +1,6 @@
+import { useAdminOperations } from 'hooks/useAdminOperations';
 import React, { useState } from 'react';
-import { useAdminOperations } from '../hooks/useAdminOperations';
+
 
 const AdminPanel: React.FC = () => {
   const { users, isUsersLoading, usersError, deleteUser } = useAdminOperations();

@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Task, UpdateTaskDetails } from '../types/task';
-import { priorityOptions, colorOptions, getPriorityFromRank, getRankValue, Color, Priority } from '../utils/taskUtils';
+import { Task, UpdateTaskDetails } from '../../types/task';
+import { priorityOptions, colorOptions, getPriorityFromRank, getRankValue, Color, Priority } from '../../utils/taskUtils';
 
 interface TaskDetailsProps {
   task: Task;

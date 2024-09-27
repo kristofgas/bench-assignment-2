@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { NewTask } from '../types/task';
-import { priorityOptions, colorOptions, Priority, Color } from '../utils/taskUtils';
+import { NewTask } from '../../types/task';
+import { priorityOptions, colorOptions, Priority, Color } from '../../utils/taskUtils';
 
 interface TaskFormProps {
   onSubmit: (task: NewTask) => void;

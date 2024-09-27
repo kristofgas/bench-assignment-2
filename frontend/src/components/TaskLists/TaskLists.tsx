@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { useTaskOperations } from '../hooks/useTaskOperations';
-import TaskList from './TaskList';
-import FilterTasks, { TaskFilters } from './FilterTasks';
+import { useTaskOperations } from '../../hooks/useTaskOperations';
+import TaskList from '../TaskList/TaskList';
+import FilterTasks, { TaskFilters } from '../FilterTasks/FilterTasks';
 
 const TaskLists: React.FC = () => {
   const [newList, setNewList] = useState({ name: '', description: '' });

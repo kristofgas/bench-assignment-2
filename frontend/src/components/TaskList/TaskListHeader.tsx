@@ -1,6 +1,6 @@
 import React from 'react';
-import { TaskList } from '../types/task';
-import { UserDto, TaskSummaryDto } from '../services/backend/types';
+import { TaskList } from '../../types/task';
+import { UserDto, TaskSummaryDto } from '../../services/backend/types';
 
 interface TaskListHeaderProps {
   taskList: TaskList;
