@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System.Text.RegularExpressions;
 
 namespace Application.Hubs
 {
@@ -13,6 +12,11 @@ namespace Application.Hubs
         public async Task LeaveTaskList(int taskListId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, taskListId.ToString());
+        }
+
+        public async Task TaskUpdated(int taskListId, int taskId)
+        {
+            await Clients.Group(taskListId.ToString()).SendAsync("TaskUpdated", taskId);
         }
     }
 }

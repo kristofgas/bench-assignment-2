@@ -16,17 +16,17 @@ interface NSwagClient<T extends ClientBase> {
 
 export const genClient = async <T extends ClientBase, V extends NSwagClient<T>>(
   Client: V,
-  _fetch?: typeof fetch
+  _fetch?: typeof fetch,
+  token?: string
 ) => {
   const backendUrl: string = await getEnv().then((x) => x.backendUrl);
-  const config = new ClientConfiguration(getToken());
+  const config = new ClientConfiguration(token || getToken());
 
   return new Client(
     config,
     backendUrl,
     {
       fetch: async (url, init) => {
-        const token = getToken();
         if (token) {
           init.headers = {
             ...init.headers,
@@ -44,7 +44,7 @@ const AUTHTOKENKEY = process.env.NEXT_PUBLIC_AUTH_TOKEN;
 const getTokenFromStorage = () => {
   if (!process.browser) return null;
 
-  return localStorage.getItem(AUTHTOKENKEY);
+  return sessionStorage.getItem(AUTHTOKENKEY);
 };
 
 const getTokenFromCookie = (context?: GetServerSidePropsContext) => {
@@ -74,8 +74,11 @@ const cookieSettings = {
 
 export const setToken = (token: string) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(AUTHTOKENKEY, token);
+    sessionStorage.setItem(AUTHTOKENKEY, token);
   }
 };
 
-export const genApiClient = () => genClient(ApiFetchClient);
+export const genApiClient = () => {
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem(AUTHTOKENKEY) || '' : '';
+  return genClient(ApiFetchClient, undefined, token);
+};

@@ -22,10 +22,12 @@ namespace Application.TaskLists.Commands.CreateTaskList
     public class CreateTaskListCommandHandler : IRequestHandler<CreateTaskListCommand, TaskListDto>
     {
         private readonly IApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public CreateTaskListCommandHandler(IApplicationDbContext context)
+        public CreateTaskListCommandHandler(IApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<TaskListDto> Handle(CreateTaskListCommand request, CancellationToken cancellationToken)
@@ -48,6 +50,8 @@ namespace Application.TaskLists.Commands.CreateTaskList
             _context.UserTaskLists.Add(userTaskList);
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            await _notificationService.SendTaskListCreatedNotification(entity.Id, entity.Id);
 
             return new TaskListDto
             {

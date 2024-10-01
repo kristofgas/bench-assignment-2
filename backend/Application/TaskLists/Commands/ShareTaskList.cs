@@ -4,6 +4,7 @@ using Application.Common.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Application.Common.Security.Attributes;
+using Domain.Entities;
 
 namespace Application.TaskLists.Commands.ShareTaskList
 {
@@ -18,14 +19,16 @@ namespace Application.TaskLists.Commands.ShareTaskList
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly INotificationService _notificationService;
 
-        public ShareTaskListCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+        public ShareTaskListCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService, INotificationService notificationService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
 
-        public async Task Handle(ShareTaskListCommand request, CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task Handle(ShareTaskListCommand request, CancellationToken cancellationToken)
         {
             var taskList = await _context.TaskLists
     .Include(tl => tl.UserTaskLists.Where(utl => !utl.IsDeleted))
@@ -48,6 +51,7 @@ namespace Application.TaskLists.Commands.ShareTaskList
                 {
                     var userTaskList = new Domain.Entities.UserTaskList { UserId = userId, TaskListId = taskList.Id };
                     _context.UserTaskLists.Add(userTaskList);
+                    await _notificationService.SendTaskListSharedNotification(userTaskList.TaskListId, userId);
                 }
             }
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { genApiClient, setToken } from "services/backend/genApiClient";
 import { LoginResult, RegisterUserCommand } from "../backend/client.generated";
 
@@ -21,30 +21,34 @@ type AuthHook = {
 export const useAuthContextValue = (): AuthHook => {
   const [authStage, setAuthStage] = useState<AuthStage>(AuthStage.UNAUTHENTICATED);
   const [activeUser, setActiveUser] = useState<LoginResult | null>(null);
-  const [token, setTokenState] = useState<string | null>(null); // Add this line
+  const [token, setTokenState] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
     setAuthStage(AuthStage.CHECKING);
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      setToken(token);
-      setTokenState(token); // Add this line
+    const storedToken = sessionStorage.getItem('jwtToken');
+    if (storedToken) {
+      setToken(storedToken);
+      setTokenState(storedToken);
       setAuthStage(AuthStage.AUTHENTICATED);
     } else {
       setAuthStage(AuthStage.UNAUTHENTICATED);
     }
   }, []);
 
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   const login = useCallback(async (username: string, password: string) => {
     const client = await genApiClient();
     try {
       const response = await client.users_Login({ username, password });
-      console.log('Login response:', response); // Debugging statement
       if (response && response.token) {
         setToken(response.token);
         setTokenState(response.token);
         setActiveUser(response);
         setAuthStage(AuthStage.AUTHENTICATED);
+        sessionStorage.setItem('jwtToken', response.token);
         return true;
       } else {
         console.error('Login failed: No token received');
@@ -69,10 +73,10 @@ export const useAuthContextValue = (): AuthHook => {
 
   const logout = useCallback(() => {
     setToken("");
-    localStorage.removeItem('jwtToken');
+    sessionStorage.removeItem('jwtToken');
     setActiveUser(null);
     setAuthStage(AuthStage.UNAUTHENTICATED);
   }, []);
 
-  return { authStage, login, register, logout, activeUser, checkAuth, token }; // Add token here
+  return { authStage, login, register, logout, activeUser, checkAuth, token };
 };

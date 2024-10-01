@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSignalR } from '../../hooks/useSignalR';
+
 import { useTaskListOperations } from '../../hooks/useTaskListOperations';
 import { useTaskSelection } from '../../hooks/useTaskSelection';
 import { TaskFilters } from '../FilterTasks/FilterTasks';
@@ -8,8 +10,8 @@ import TaskListShare from './TaskListShare';
 import TaskListTasks from './TaskListTasks';
 import TaskListDetails from './TaskListDetails';
 import SelectedTaskDetails from 'components/Task/SelectedTaskDetails';
-import { draftMode } from 'next/dist/client/components/headers';
-
+import { useQueryClient } from '@tanstack/react-query';
+import { HubConnectionState } from '@microsoft/signalr';
 
 interface TaskListProps {
   listId: number;
@@ -17,6 +19,10 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
+
+  const queryClient = useQueryClient();
+  const { joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners } = useSignalR();
+  
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -60,6 +66,18 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
   useEffect(() => {
     setSelectedTask(null);
   }, [listId, setSelectedTask]);
+
+  const { connection, connectionState } = useSignalR();
+
+  useEffect(() => {
+    joinTaskList(listId);
+    setupTaskListListeners(listId, queryClient);
+
+    return () => {
+      leaveTaskList(listId);
+      removeTaskListListeners();
+    };
+  }, [listId, joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners, queryClient]);
 
   if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
   if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) return <div>Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;

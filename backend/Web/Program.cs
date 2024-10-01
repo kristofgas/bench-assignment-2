@@ -148,7 +148,7 @@ try
 
 
 
-    app.UseCors("DefaultCors");
+    //app.UseCors("DefaultCors");
 
     app.UseSerilogRequestLogging();
     app.UseHealthChecks("/health");

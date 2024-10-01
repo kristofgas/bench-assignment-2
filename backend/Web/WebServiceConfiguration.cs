@@ -26,16 +26,19 @@ namespace Web
                   {
                       if (allowedOrigins is not null && allowedOrigins.Length > 0)
                       {
-                          builder.WithOrigins(allowedOrigins);
+                          builder.WithOrigins(allowedOrigins)
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod()
+                                 .AllowCredentials();
                       }
                       else
                       {
-                          builder.AllowAnyOrigin();
+                          builder.AllowAnyOrigin()
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
                       }
-                      builder.AllowAnyHeader();
-                      builder.AllowAnyMethod();
                   });
-            });
+            }); ;
 
 
             services.AddHttpContextAccessor();
