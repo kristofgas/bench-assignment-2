@@ -49,13 +49,16 @@ namespace Application.Users.Queries.LoginUser
 
             var roleEnums = roles.Select(r => (RoleEnum)r).ToList();
 
+            var roleStrings = roleEnums.Select(v => v.ToString()).ToList();
+
             var token = _jwtTokenGenerator.GenerateToken(user, roleEnums);
             return new LoginResult
             {
                 Success = true,
                 UserId = user.Id,
                 Username = user.Username,
-                Token = token
+                Token = token,
+                Roles = roleStrings
             };
         }
     }

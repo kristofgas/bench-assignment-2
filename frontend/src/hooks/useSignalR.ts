@@ -22,11 +22,10 @@ export const useSignalR = () => {
   }, [connection, token]);
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('jwtToken');
-    if (storedToken) {
+    if (token) {
       const newConnection = new HubConnectionBuilder()
         .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/taskHub`, {
-          accessTokenFactory: () => sessionStorage.getItem('jwtToken') || ''
+          accessTokenFactory: () => token
         })
         .withAutomaticReconnect()
         .configureLogging(LogLevel.Information)

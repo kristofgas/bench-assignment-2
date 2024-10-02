@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useAuth } from '../services/auth/useAuth';
 import { AuthStage } from '../services/auth/useAuthContextValue';
 
 export const useAuthStatus = () => {
-  const { authStage, token, logout } = useAuth();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { authStage, token, logout, activeUser } = useAuth();
+  
+  const isAuthenticated = authStage !== AuthStage.UNAUTHENTICATED;
+  const isAdmin = activeUser?.roles?.includes('Admin') || false;
+  const roles = activeUser?.roles || [];
 
-  useEffect(() => {
-    setIsAuthenticated(authStage !== AuthStage.UNAUTHENTICATED);
-  }, [authStage]);
-
-  return { isAuthenticated, token, logout, authStage };
+  return { isAuthenticated, isAdmin, token, logout, authStage, roles };
 };

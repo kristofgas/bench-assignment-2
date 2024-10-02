@@ -1577,6 +1577,7 @@ export interface LoginResult {
     userId?: number;
     username?: string;
     token?: string;
+    roles?: string[];
 }
 
 export interface LoginUserQuery {
