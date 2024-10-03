@@ -78,10 +78,29 @@ export const useSignalR = () => {
     if (connection) {
       const handlers = ['TaskCreated', 'TaskUpdated', 'TaskDeleted', 'TaskListShared'];
       handlers.forEach(handler => {
-        connection.on(handler, () => {
-          queryClient.invalidateQueries({ queryKey: ['tasks', taskListId] });
+        connection.on(handler, (sharedTaskListId?: number) => {
+          if (handler === 'TaskListShared') {
+            queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+            
+          } else {
+            queryClient.invalidateQueries({ queryKey: ['tasks', taskListId] });
+          }
         });
       });
+    }
+  }, [connection]);
+
+  const setupTaskListsListener = useCallback((queryClient: QueryClient) => {
+    if (connection) {
+      connection.on('TaskListCreated', () => {
+        queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+      });
+    }
+  }, [connection]);
+  
+  const removeTaskListsListener = useCallback(() => {
+    if (connection) {
+      connection.off('TaskListCreated');
     }
   }, [connection]);
 
@@ -94,12 +113,14 @@ export const useSignalR = () => {
     }
   }, [connection]);
 
-  return { 
-    connection, 
-    connectionState, 
-    joinTaskList, 
-    leaveTaskList, 
-    setupTaskListListeners, 
-    removeTaskListListeners 
+  return {
+    connection,
+    connectionState,
+    joinTaskList,
+    leaveTaskList,
+    setupTaskListListeners,
+    removeTaskListListeners,
+    setupTaskListsListener,
+    removeTaskListsListener
   };
 };

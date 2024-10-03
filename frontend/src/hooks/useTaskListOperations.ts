@@ -4,12 +4,24 @@ import { Task, NewTask, UpdateTaskDetails, TaskList } from '../types/task';
 import { Color, getRankValue } from '../utils/taskUtils';
 import { TaskFilters } from 'components/FilterTasks/FilterTasks';
 import { TaskDto, TaskListDto, TaskSummaryDto, UserDto } from '../services/backend/types';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useSignalR } from './useSignalR';
 
 export function useTaskListOperations(listId: number, filters: TaskFilters) {
   const { apiCall } = useApi();
   const queryClient = useQueryClient();
   const [isSharing, setIsSharing] = useState(false);
+  const { joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners } = useSignalR();
+
+  useEffect(() => {
+    joinTaskList(listId);
+    setupTaskListListeners(listId, queryClient);
+
+    return () => {
+      leaveTaskList(listId);
+      removeTaskListListeners();
+    };
+  }, [listId, joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners, queryClient]);
 
   const { data: taskList, isLoading: isTaskListLoading, error: taskListError } = useQuery<TaskListDto, Error, TaskList>({
     queryKey: ['taskList', listId],
