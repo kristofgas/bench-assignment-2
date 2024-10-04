@@ -78,6 +78,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
       })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
+      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
     },
   });
 
@@ -90,6 +91,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
       queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
+      
     },
   });
 
@@ -127,6 +129,8 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['associatedUsers', listId] });
       queryClient.invalidateQueries({ queryKey: ['nonAssociatedUsers', listId] });
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
       setIsSharing(false);
     },
     onError: () => {

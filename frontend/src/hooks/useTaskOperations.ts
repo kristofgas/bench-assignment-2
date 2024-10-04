@@ -1,10 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { TaskListDto } from '../services/backend/types';
+import { useSignalR } from './useSignalR';
+import { useEffect } from 'react';
 
 export function useTaskOperations() {
   const { apiCall } = useApi();
   const queryClient = useQueryClient();
+  const { setupTaskListsListener, removeTaskListsListener } = useSignalR();
+
+  useEffect(() => {
+    setupTaskListsListener(queryClient);
+    return () => {
+      removeTaskListsListener();
+    };
+  }, [setupTaskListsListener, removeTaskListsListener, queryClient]);
 
   const { data: taskLists, isLoading: isTaskListsLoading, error: taskListsError } = useQuery<TaskListDto[]>({
     queryKey: ['taskLists'],

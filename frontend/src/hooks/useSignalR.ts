@@ -81,19 +81,28 @@ export const useSignalR = () => {
         connection.on(handler, (sharedTaskListId?: number) => {
           if (handler === 'TaskListShared') {
             queryClient.invalidateQueries({ queryKey: ['taskLists'] });
-            
+            if (sharedTaskListId) {
+              queryClient.invalidateQueries({ queryKey: ['taskList', sharedTaskListId] });
+              queryClient.invalidateQueries({ queryKey: ['taskSummary', sharedTaskListId] });
+            }
           } else {
             queryClient.invalidateQueries({ queryKey: ['tasks', taskListId] });
+            queryClient.invalidateQueries({ queryKey: ['taskSummary', taskListId] });
           }
         });
       });
     }
   }, [connection]);
 
+  
   const setupTaskListsListener = useCallback((queryClient: QueryClient) => {
     if (connection) {
       connection.on('TaskListCreated', () => {
         queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+      });
+      connection.on('TaskListShared', (sharedTaskListId: number) => {
+        queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+        queryClient.invalidateQueries({ queryKey: ['taskList', sharedTaskListId] });
       });
     }
   }, [connection]);
@@ -101,6 +110,7 @@ export const useSignalR = () => {
   const removeTaskListsListener = useCallback(() => {
     if (connection) {
       connection.off('TaskListCreated');
+      connection.off('TaskListShared')
     }
   }, [connection]);
 
