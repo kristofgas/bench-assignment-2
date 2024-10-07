@@ -5,6 +5,8 @@ import { ReactElement } from "react";
 import { AuthContextProvider } from "services/auth/useAuth";
 import { LocaleContextProvider } from "services/locale/useLocale";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SignalRProvider } from '../providers/SignalRProvider';
+
 
 export function reportWebVitals(metric: NextWebVitalsMetric): void {
   // TODO consider removing before moving into production. Or limit the scope.
@@ -36,14 +38,12 @@ const MyApp = ({ Component, pageProps, __N_SSG }: AppProps): ReactElement => {
         <h1>JavaScript must be enabled!</h1>
       </noscript>
       <QueryClientProvider client={queryClient}>
-        <AuthContextProvider>
-          <I18nProvider table={pageProps.table}>
-            <LocaleContextProvider>
-              <Component {...pageProps} />
-            </LocaleContextProvider>
-          </I18nProvider>
-        </AuthContextProvider>
-      </QueryClientProvider>
+      <AuthContextProvider>
+          <SignalRProvider>
+            <Component {...pageProps} />
+          </SignalRProvider>
+      </AuthContextProvider>
+    </QueryClientProvider>
     </main>
   );
 };

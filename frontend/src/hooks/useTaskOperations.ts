@@ -1,20 +1,39 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { TaskListDto } from '../services/backend/types';
-import { useSignalR } from './useSignalR';
-import { useEffect } from 'react';
+import { useSignalREvent } from './useSignalREvent';
+import { useQueryInvalidation } from './useQueryInvalidation';
 
 export function useTaskOperations() {
   const { apiCall } = useApi();
+  const { invalidateQueries } = useQueryInvalidation();
   const queryClient = useQueryClient();
-  const { setupTaskListsListener, removeTaskListsListener } = useSignalR();
 
-  useEffect(() => {
-    setupTaskListsListener(queryClient);
-    return () => {
-      removeTaskListsListener();
-    };
-  }, [setupTaskListsListener, removeTaskListsListener, queryClient]);
+  useSignalREvent('TaskListCreated', () => {
+    invalidateQueries(['taskLists']);
+  });
+
+  useSignalREvent('TaskListShared', (sharedTaskListId: number) => {
+    invalidateQueries(['taskLists']);
+    apiCall(client => client.tasks_GetTaskList(sharedTaskListId))
+      .then((newTaskList) => {
+        queryClient.setQueryData(['taskLists'], (oldData: TaskListDto[] | undefined) => {
+          if (oldData) {
+            const existingIndex = oldData.findIndex(list => list.id === newTaskList.id);
+            if (existingIndex !== -1) {
+              // Replace the existing task list
+              const updatedData = [...oldData];
+              updatedData[existingIndex] = newTaskList;
+              return updatedData;
+            } else {
+              // Add the new task list
+              return [...oldData, newTaskList];
+            }
+          }
+          return [newTaskList];
+        });
+      });
+  });
 
   const { data: taskLists, isLoading: isTaskListsLoading, error: taskListsError } = useQuery<TaskListDto[]>({
     queryKey: ['taskLists'],
@@ -24,10 +43,14 @@ export function useTaskOperations() {
   const createTaskList = useMutation({
     mutationFn: (list: { name: string; description: string }) => 
       apiCall(client => client.tasks_CreateTaskList(list)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+    onSuccess: (newTaskList) => {
+      queryClient.setQueryData(['taskLists'], (oldData: TaskListDto[] | undefined) => {
+        return oldData ? [...oldData, newTaskList] : [newTaskList];
+      });
     },
   });
+
+  
 
   return {
     taskLists,

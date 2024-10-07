@@ -1,27 +1,46 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Task, NewTask, UpdateTaskDetails, TaskList } from '../types/task';
 import { Color, getRankValue } from '../utils/taskUtils';
 import { TaskFilters } from 'components/FilterTasks/FilterTasks';
 import { TaskDto, TaskListDto, TaskSummaryDto, UserDto } from '../services/backend/types';
-import { useMemo, useState, useEffect } from 'react';
-import { useSignalR } from './useSignalR';
+import { useState, useEffect } from 'react';
+import { useSignalRConnection } from '../providers/SignalRProvider';
+import { useSignalREvent } from './useSignalREvent';
+import { useQueryInvalidation } from './useQueryInvalidation';
 
 export function useTaskListOperations(listId: number, filters: TaskFilters) {
   const { apiCall } = useApi();
-  const queryClient = useQueryClient();
+  const { invalidateQueries } = useQueryInvalidation();
   const [isSharing, setIsSharing] = useState(false);
-  const { joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners } = useSignalR();
+  const { connection } = useSignalRConnection();
 
   useEffect(() => {
-    joinTaskList(listId);
-    setupTaskListListeners(listId, queryClient);
+    if (connection) {
+      connection.invoke('JoinTaskList', listId).catch(err => console.error('Error joining task list:', err));
+      return () => {
+        connection.invoke('LeaveTaskList', listId).catch(err => console.error('Error leaving task list:', err));
+      };
+    }
+  }, [connection, listId]);
 
-    return () => {
-      leaveTaskList(listId);
-      removeTaskListListeners();
-    };
-  }, [listId, joinTaskList, leaveTaskList, setupTaskListListeners, removeTaskListListeners, queryClient]);
+  useSignalREvent('TaskCreated', () => {
+    invalidateQueries(['tasks', 'taskSummary']);
+  });
+
+  useSignalREvent('TaskUpdated', () => {
+    invalidateQueries(['tasks', 'taskSummary']);
+  });
+
+  useSignalREvent('TaskDeleted', () => {
+    invalidateQueries(['tasks', 'taskSummary']);
+  });
+
+  useSignalREvent('TaskListShared', (sharedTaskListId: number) => {
+    if (sharedTaskListId === listId) {
+      invalidateQueries(['taskList', 'associatedUsers', 'nonAssociatedUsers', 'taskSummary']);
+    }
+  });
 
   const { data: taskList, isLoading: isTaskListLoading, error: taskListError } = useQuery<TaskListDto, Error, TaskList>({
     queryKey: ['taskList', listId],
@@ -76,10 +95,6 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
         rank: getRankValue(newTask.rank),
         taskListId: listId
       })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
-      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
-    },
   });
 
   const updateTaskStatus = useMutation({
@@ -88,11 +103,6 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
         const task = tasks?.find(t => t.id === taskId);
         return client.tasks_UpdateTaskStatus(taskId, { id: taskId, isCompleted: !task?.isCompleted });
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
-      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
-      
-    },
   });
 
   const updateTaskDetails = useMutation({
@@ -105,10 +115,6 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
         color: updatedTask.color,
         isFavorite: updatedTask.isFavorite
       })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
-      queryClient.invalidateQueries({ queryKey: ['taskList', listId] });
-    },
   });
 
   const { data: associatedUsers, isLoading: isAssociatedUsersLoading, error: associatedUsersError } = useQuery<UserDto[]>({
@@ -120,17 +126,13 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     queryKey: ['nonAssociatedUsers', listId],
     queryFn: () => apiCall(client => client.tasks_GetUsersByTaskListAssociation(listId, false)),
   });
-  
+
   const shareTaskList = useMutation({
     mutationFn: (userIdsToShare: number[]) => {
       setIsSharing(true);
       return apiCall(client => client.tasks_ShareTaskList(listId, userIdsToShare));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['associatedUsers', listId] });
-      queryClient.invalidateQueries({ queryKey: ['nonAssociatedUsers', listId] });
-      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
-      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
       setIsSharing(false);
     },
     onError: () => {
@@ -145,10 +147,6 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
 
   const clearCompletedTasks = useMutation({
     mutationFn: () => apiCall(client => client.tasks_ClearCompletedTasks(listId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', listId, filters] });
-      queryClient.invalidateQueries({ queryKey: ['taskSummary', listId] });
-    },
   });
 
   return {
@@ -173,6 +171,5 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
     isTaskSummaryLoading,
     taskSummaryError,
     clearCompletedTasks,
-
   };
 }

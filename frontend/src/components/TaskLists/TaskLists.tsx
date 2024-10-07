@@ -17,8 +17,9 @@ const TaskLists: React.FC = () => {
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     createTaskList.mutate(newList, {
-      onSuccess: () => {
+      onSuccess: (newTaskList) => {
         setNewList({ name: '', description: '' });
+        setSelectedListId(newTaskList.id);
       }
     });
   }, [createTaskList, newList]);
@@ -51,15 +52,15 @@ const TaskLists: React.FC = () => {
         <button type="submit">Create New List</button>
       </form>
       <ul>
-        {taskLists?.map(list => (
-          <li key={list.id} onClick={() => handleListSelect(list.id)}>
-            {list.name}
-          </li>
-        ))}
-      </ul>
+  {taskLists?.map(list => (
+    <li key={`${list.id}-${list.name}`} onClick={() => handleListSelect(list.id)}>
+      {list.name}
+    </li>
+  ))}
+</ul>
       {selectedListId && <TaskList listId={selectedListId} filters={filters} />}
     </div>
   );
-};
+}
 
 export default TaskLists;

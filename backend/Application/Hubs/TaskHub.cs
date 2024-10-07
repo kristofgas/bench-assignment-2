@@ -18,5 +18,6 @@ namespace Application.Hubs
         {
             await Clients.Group(taskListId.ToString()).SendAsync("TaskUpdated", taskId);
         }
+
     }
 }
