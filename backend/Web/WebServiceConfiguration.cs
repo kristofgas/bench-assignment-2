@@ -71,7 +71,7 @@ namespace Web
             services.AddScoped<IAuthorizationService, Infrastructure.Services.AuthorizationService>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-            services.AddSignalR();
+            //services.AddSignalR();
         }
     }
 }

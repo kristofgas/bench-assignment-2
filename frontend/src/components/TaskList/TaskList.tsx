@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useTaskListOperations } from '../../hooks/useTaskListOperations';
 import { useTaskSelection } from '../../hooks/useTaskSelection';
 import { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskListHeader from './TaskListHeader';
 import TaskForm from '../Task/TaskForm';
-import TaskListShare from './TaskListShare';
 import TaskListTasks from './TaskListTasks';
 import TaskListDetails from './TaskListDetails';
 import SelectedTaskDetails from 'components/Task/SelectedTaskDetails';
+import { TaskListContentSkeleton } from 'components/Skeletons/TaskListContentSkeleton';
 
 interface TaskListProps {
   listId: number;
@@ -16,9 +16,6 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const [showShareDropdown, setShowShareDropdown] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-
   const {
     selectedTask,
     setSelectedTask,
@@ -26,10 +23,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     setEditingTask,
     handleTaskSelect: handleTaskSelectHook,
     handleTaskEdit,
-    handleShareClick,
-    handleShareSubmit,
     handleTaskUpdate,
-    handleUserSelect,
   } = useTaskSelection();
 
   const {
@@ -58,54 +52,61 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
     setSelectedTask(null);
   }, [listId, setSelectedTask]);
 
-  if (isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading) return <div>Loading...</div>;
-  if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) return <div>Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
+  if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) 
+    return <div className="text-red-500">Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
 
   return (
-    <div>
-      <TaskListHeader
-        taskList={taskList}
-        associatedUsers={associatedUsers}
-        taskSummary={taskSummary}
-        onClearCompletedTasks={() => clearCompletedTasks.mutate()}
-      />
-      <button onClick={() => setShowNewTaskForm(true)}>Add New Task</button>
-      <button onClick={() => handleShareClick(setShowShareDropdown)}>Share Task List</button>
-      {showShareDropdown && (
-        <TaskListShare
-          nonAssociatedUsers={nonAssociatedUsers}
-          onShare={() => handleShareSubmit(shareTaskList, selectedUsers, setShowShareDropdown, setSelectedUsers)}
-          isSharing={isSharing}
-          onUserSelect={(userId) => handleUserSelect(userId, setSelectedUsers)}
-          selectedUsers={selectedUsers}
-        />
-      )}
-      <TaskListTasks
-  tasks={tasks}
-  onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
-  onEdit={handleTaskEdit}
-  onSelect={(task) => handleTaskSelectHook(task, setSelectedTask)}
+    <div className="bg-white rounded-lg p-6">
+      <Suspense fallback={<TaskListContentSkeleton />}>
+        {isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading ? (
+          <TaskListContentSkeleton />
+        ) : (
+          <>
+            <TaskListHeader
+  taskList={taskList}
+  associatedUsers={associatedUsers}
+  nonAssociatedUsers={nonAssociatedUsers}
+  taskSummary={taskSummary}
+  onClearCompletedTasks={() => clearCompletedTasks.mutate()}
+  onShare={(selectedUsers) => shareTaskList.mutate(selectedUsers)}
+  isSharing={isSharing}
+  onAddNewTask={() => setShowNewTaskForm(true)}
 />
-      {showNewTaskForm && (
-        <TaskForm
-          onSubmit={(newTask) => {
-            createTask.mutate(newTask);
-            setShowNewTaskForm(false);
-          }}
-          onCancel={() => setShowNewTaskForm(false)}
-        />
-      )}
-      <TaskListDetails
-        editingTask={editingTask}
-        onClose={() => setEditingTask(null)}
-        onUpdate={(updatedTask) => handleTaskUpdate(updateTaskDetails, updatedTask, setEditingTask, setSelectedTask)}
+            <TaskListTasks
+              activeTasks={tasks.filter(task => !task.isCompleted)}
+              completedTasks={tasks.filter(task => task.isCompleted)}
+              onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
+              onEdit={handleTaskEdit}
+              onSelect={(task) => handleTaskSelectHook(task, setSelectedTask)}
+            />
+            {showNewTaskForm && (
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+    <div className="relative p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+      <button
+        onClick={() => setShowNewTaskForm(false)}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
+      <TaskForm
+        onSubmit={(newTask) => {
+          createTask.mutate(newTask);
+          setShowNewTaskForm(false);
+        }}
+        onCancel={() => setShowNewTaskForm(false)}
       />
-      {selectedTask && !editingTask && (
-        <SelectedTaskDetails
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-        />
-      )}
+    </div>
+  </div>
+)}
+          
+            <TaskListDetails
+              editingTask={editingTask}
+              onClose={() => setEditingTask(null)}
+              onUpdate={(updatedTask) => handleTaskUpdate(updateTaskDetails, updatedTask, setEditingTask, setSelectedTask)}
+            />
+          </>
+        )}
+      </Suspense>
     </div>
   );
 };

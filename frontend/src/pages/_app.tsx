@@ -6,6 +6,7 @@ import { AuthContextProvider } from "services/auth/useAuth";
 import { LocaleContextProvider } from "services/locale/useLocale";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SignalRProvider } from '../providers/SignalRProvider';
+import '../styles/global.css';
 
 
 export function reportWebVitals(metric: NextWebVitalsMetric): void {

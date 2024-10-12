@@ -1,4 +1,4 @@
-"use client"
+/*
 import { useEffect, useRef, useState } from "react";
 
 export const useMemoAsync = <T>(
@@ -38,3 +38,5 @@ export const useMemoAsync = <T>(
 
   return { value, loading: isLoading, error };
 };
+
+*/
