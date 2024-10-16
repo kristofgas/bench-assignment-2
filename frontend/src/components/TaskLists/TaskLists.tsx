@@ -1,13 +1,14 @@
-import React, { useCallback, useState, Suspense } from 'react';
-import { useTaskOperations } from '../../hooks/useTaskOperations';
+import React, { useState, useCallback } from 'react';
+import { FaPlus, FaChevronDown, FaChevronUp, FaTasks } from 'react-icons/fa';
+import FilterTasks from '../FilterTasks/FilterTasks';
 import TaskList from '../TaskList/TaskList';
-import FilterTasks, { TaskFilters } from '../FilterTasks/FilterTasks';
-import { TaskListSkeleton } from 'components/Skeletons/TaskListSkeleton';
-
+import NewTaskListModal from './NewTaskListModal';
+import { useTaskOperations } from '../../hooks/useTaskOperations';
+import { TaskFilters } from '../../types/task';
 
 const TaskLists: React.FC = () => {
-  const [newList, setNewList] = useState({ name: '', description: '' });
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [showNewListForm, setShowNewListForm] = useState(false);
   const [filters, setFilters] = useState<TaskFilters>({
     isCompleted: null,
     isFavorite: null,
@@ -16,15 +17,13 @@ const TaskLists: React.FC = () => {
   });
   const { taskLists, isTaskListsLoading, taskListsError, createTaskList } = useTaskOperations();
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    createTaskList.mutate(newList, {
+  const handleNewListSubmit = useCallback((name: string, description: string) => {
+    createTaskList.mutate({ name, description }, {
       onSuccess: (newTaskList) => {
-        setNewList({ name: '', description: '' });
         setSelectedListId(newTaskList.id);
       }
     });
-  }, [createTaskList, newList]);
+  }, [createTaskList]);
 
   const handleListSelect = (listId: number) => {
     setSelectedListId(listId === selectedListId ? null : listId);
@@ -33,51 +32,68 @@ const TaskLists: React.FC = () => {
   if (taskListsError) return <div className="text-red-500">Error: {taskListsError.toString()}</div>;
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/4 bg-gray-100 p-4 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-4">Task Lists</h1>
-        <form onSubmit={handleSubmit} className="mb-4">
-          <input
-            type="text"
-            value={newList.name}
-            onChange={(e) => setNewList({...newList, name: e.target.value})}
-            placeholder="New list name"
-            required
-            className="w-full p-2 mb-2 border border-gray-300 rounded"
-          />
-          <input
-            type="text"
-            value={newList.description}
-            onChange={(e) => setNewList({...newList, description: e.target.value})}
-            placeholder="New list description"
-            className="w-full p-2 mb-2 border border-gray-300 rounded"
-          />
-          <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Create New List
-          </button>
-        </form>
-        <Suspense fallback={<TaskListSkeleton />}>
-          {isTaskListsLoading ? (
-            <TaskListSkeleton />
-          ) : (
-            <ul className="space-y-2">
-              {taskLists?.map(list => (
-                <li 
-                  key={`${list.id}-${list.name}`} 
-                  onClick={() => handleListSelect(list.id)}
-                  className={`p-2 rounded cursor-pointer hover:bg-gray-200 ${selectedListId === list.id ? 'bg-gray-200' : ''}`}
-                >
-                  {list.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Suspense>
-      </div>
-      <div className="w-3/4 p-4 overflow-y-auto">
+    <div className="container mx-auto p-4 relative">
+      <div className="fixed top-4 right-4 z-10">
         <FilterTasks onFilterChange={setFilters} />
-        {selectedListId && <TaskList listId={selectedListId} filters={filters} />}
       </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Task Lists</h1>
+        <button
+          onClick={() => setShowNewListForm(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+        >
+          <FaPlus className="inline-block mr-2" /> New List
+        </button>
+      </div>
+      {isTaskListsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {taskLists?.map(list => (
+            <div
+              key={`${list.id}-${list.name}`}
+              className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out ${
+                selectedListId === list.id ? 'col-span-full row-span-2' : ''
+              }`}
+            >
+              <div
+                onClick={() => handleListSelect(list.id)}
+                className="p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-lg">{list.name}</h3>
+                  {selectedListId === list.id ? <FaChevronUp /> : <FaChevronDown />}
+                </div>
+                <p className="text-sm text-gray-600 mt-2">{list.description}</p>
+                {selectedListId !== list.id && (
+                  <div className="mt-4 flex items-center text-gray-500">
+                    <FaTasks className="mr-2" />
+                    <span>{list.taskCount || 0} tasks</span>
+                  </div>
+                )}
+              </div>
+              {selectedListId === list.id && (
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <TaskList listId={list.id} filters={filters} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {showNewListForm && (
+        <NewTaskListModal
+          onClose={() => setShowNewListForm(false)}
+          onSubmit={handleNewListSubmit}
+        />
+      )}
     </div>
   );
 };

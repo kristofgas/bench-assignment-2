@@ -21,7 +21,7 @@ const SelectedTaskDetails: React.FC<SelectedTaskDetailsProps> = ({ task, onClose
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="p-6 border-t border-gray-200">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">{task.title}</h3>
         <button
@@ -51,13 +51,6 @@ const SelectedTaskDetails: React.FC<SelectedTaskDetailsProps> = ({ task, onClose
           <span>Last modified by: {task.lastModifiedBy}</span>
         </div>
       </div>
-      
-      <button
-        onClick={onClose}
-        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
-      >
-        Close
-      </button>
     </div>
   );
 };

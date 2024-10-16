@@ -29,7 +29,7 @@ export function useTaskListOperations(listId: number, filters: TaskFilters) {
   });
 
   useSignalREvent('TaskUpdated', () => {
-    invalidateQueries(['tasks', 'taskSummary']);
+    invalidateQueries(['tasks', 'taskSummary', 'taskSummaries']);
   });
 
   useSignalREvent('TaskDeleted', () => {

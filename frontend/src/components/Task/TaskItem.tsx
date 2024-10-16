@@ -42,60 +42,63 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onStatusChange, onEdit, onSel
   return (
     <div className="mb-2 last:mb-0">
       <div 
-        className={`flex items-center p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out ${
+        className={`rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out ${
           task.isCompleted ? 'opacity-60' : ''
-        }`}
+        } ${isExpanded ? 'rounded-b-none' : ''}`}
         style={{ backgroundColor: subtleBackgroundColor }}
-        onClick={onExpand}
       >
-        <label className="inline-flex items-center mr-4 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={task.isCompleted}
-            onChange={(e) => { e.stopPropagation(); onStatusChange(); }}
-            className="hidden"
-          />
-          <span className={`w-6 h-6 border-2 rounded-full flex items-center justify-center transition-colors duration-200 ease-in-out ${
-            task.isCompleted 
-              ? 'bg-green-500 border-green-500' 
-              : 'border-gray-300 hover:border-green-500'
-          }`}>
-            {task.isCompleted && (
-              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-          </span>
-        </label>
-        <div className="flex-grow">
-          <div className="flex items-center">
-            <span className={`mr-2 font-medium ${task.isCompleted ? 'text-gray-500' : 'text-gray-800'}`}>
-              {task.title}
+        <div 
+          className="flex items-center p-4 cursor-pointer"
+          onClick={onExpand}
+        >
+          <label className="inline-flex items-center mr-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={task.isCompleted}
+              onChange={(e) => { e.stopPropagation(); onStatusChange(); }}
+              className="hidden"
+            />
+            <span className={`w-6 h-6 border-2 rounded-full flex items-center justify-center transition-colors duration-200 ease-in-out ${
+              task.isCompleted 
+                ? 'bg-green-500 border-green-500' 
+                : 'border-gray-300 hover:border-green-500'
+            }`}>
+              {task.isCompleted && (
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </span>
-            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${priorityColor}`}>
-              {priority}
-            </span>
-            {task.isFavorite && <FaStar className="text-yellow-400 ml-2" size={16} />}
+          </label>
+          <div className="flex-grow">
+            <div className="flex items-center">
+              <span className={`mr-2 font-medium ${task.isCompleted ? 'text-gray-500' : 'text-gray-800'}`}>
+                {task.title}
+              </span>
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${priorityColor}`}>
+                {priority}
+              </span>
+              {task.isFavorite && <FaStar className="text-yellow-400 ml-2" size={16} />}
+            </div>
           </div>
-         
-        </div>
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition-colors duration-200"
-          >
-            <FaEdit size={18} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onExpand(); }}
-            className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-          >
-            {isExpanded ? <FaChevronUp size={18} /> : <FaChevronDown size={18} />}
-          </button>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition-colors duration-200"
+            >
+              <FaEdit size={18} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onExpand(); }}
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+            >
+              {isExpanded ? <FaChevronUp size={18} /> : <FaChevronDown size={18} />}
+            </button>
+          </div>
         </div>
       </div>
       {isExpanded && (
-        <div className="mt-2">
+        <div className="rounded-b-lg shadow-sm" style={{ backgroundColor: subtleBackgroundColor }}>
           <SelectedTaskDetails task={task} onClose={onExpand} onEdit={onEdit} />
         </div>
       )}

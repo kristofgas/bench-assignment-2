@@ -19,9 +19,8 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
   };
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-2">Active Tasks</h3>
-      <div className="mb-6">
+    <div className="bg-gray-50 rounded-b-lg overflow-hidden">
+      <div className="px-6 py-4">
         {activeTasks.map(task => (
           <TaskItem
             key={task.id}
@@ -35,18 +34,15 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
         ))}
       </div>
       {completedTasks.length > 0 && (
-        <>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold">Completed Tasks</h3>
-            <button
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="text-blue-500 hover:text-blue-700"
-            >
-              {showCompleted ? 'Hide' : 'Show'}
-            </button>
-          </div>
+        <div className="border-t border-gray-200 px-6 py-4">
+          <button
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4"
+          >
+            {showCompleted ? 'Hide completed tasks' : `Show completed tasks (${completedTasks.length})`}
+          </button>
           {showCompleted && (
-            <div>
+            <div className="space-y-2">
               {completedTasks.map(task => (
                 <TaskItem
                   key={task.id}
@@ -60,7 +56,7 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
