@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
 
+  const handleRegisterSuccess = () => {
+    setIsLogin(true);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -22,7 +26,7 @@ const AuthPage: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {isLogin ? <Login /> : <Register />}
+            {isLogin ? <Login /> : <Register onRegisterSuccess={handleRegisterSuccess} />}
           </motion.div>
         </AnimatePresence>
         <div className="text-center">

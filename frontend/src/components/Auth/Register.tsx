@@ -10,7 +10,11 @@ interface RegisterFormData {
   confirmPassword: string;
 }
 
-const Register: React.FC = () => {
+interface RegisterProps {
+  onRegisterSuccess: () => void;
+}
+
+const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const { register: registerUser } = useAuth();
   const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterFormData>();
 
@@ -22,6 +26,7 @@ const Register: React.FC = () => {
     const success = await registerUser(data.username, data.email, data.password);
     if (success) {
       toast.success('Registration successful! Please log in.');
+      onRegisterSuccess();
     } else {
       toast.error('Registration failed. Please try again.');
     }
