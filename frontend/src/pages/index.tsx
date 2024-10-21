@@ -1,37 +1,29 @@
-import React, { useState } from 'react';
-import Login from '../components/Auth/Login';
-import TaskLists from '../components/TaskLists/TaskLists';
-import { useRouter } from 'next/router';
+import React from 'react';
 import { useAuthStatus } from '../hooks/useAuthStatus';
-import Register from 'components/Auth/Register';
+import AuthPage from '../components/Auth/AuthPage';
+import TaskLists from '../components/TaskLists/TaskLists';
+import Header from '../components/Header/Header';
 import AdminPanel from 'components/AdminPanel/AdminPanel';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage: React.FC = () => {
-  const { isAuthenticated, isAdmin, logout } = useAuthStatus();
-  const [showRegister, setShowRegister] = useState(false);
-  const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div>
-        {showRegister ? <Register /> : <Login />}
-        <button onClick={() => setShowRegister(!showRegister)}>
-          {showRegister ? 'Switch to Login' : 'Switch to Register'}
-        </button>
-      </div>
-    );
-  }
+  const { isAuthenticated, isAdmin } = useAuthStatus();
 
   return (
-    <div>
-      <button onClick={handleLogout}>Logout</button>
-      {isAdmin && <AdminPanel />}
-      <TaskLists />
+    <div className="min-h-screen bg-gray-100">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      {isAuthenticated ? (
+        <>
+          <Header />
+          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            {isAdmin && <AdminPanel />}
+            <TaskLists />
+          </main>
+        </>
+      ) : (
+        <AuthPage />
+      )}
     </div>
   );
 };

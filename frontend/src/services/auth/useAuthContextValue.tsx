@@ -11,11 +11,11 @@ export enum AuthStage {
 type AuthHook = {
   authStage: AuthStage;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   activeUser: LoginResult | null;
   checkAuth: () => Promise<void>;
-  token: string | null; // Add this line
+  token: string | null;
 };
 
 export const useAuthContextValue = (): AuthHook => {
@@ -60,13 +60,14 @@ export const useAuthContextValue = (): AuthHook => {
     }
   }, []);
 
-  const register = useCallback(async (username: string, password: string) => {
+  const register = useCallback(async (username: string, email: string, password: string) => {
     const client = await genApiClient();
     try {
-      const command: RegisterUserCommand = { username, password };
+      const command: RegisterUserCommand = { username, email, password };
       await client.users_Register(command);
       return true;
-    } catch {
+    } catch (error) {
+      console.error('Registration error:', error);
       return false;
     }
   }, []);

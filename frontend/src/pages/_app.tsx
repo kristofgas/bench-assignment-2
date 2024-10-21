@@ -7,6 +7,7 @@ import { LocaleContextProvider } from "services/locale/useLocale";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SignalRProvider } from '../providers/SignalRProvider';
 import '../styles/global.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export function reportWebVitals(metric: NextWebVitalsMetric): void {
