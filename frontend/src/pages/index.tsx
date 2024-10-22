@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import AuthPage from '../components/Auth/AuthPage';
 import TaskLists from '../components/TaskLists/TaskLists';
@@ -8,7 +8,17 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage: React.FC = () => {
-  const { isAuthenticated, isAdmin } = useAuthStatus();
+  const { isAuthenticated, isAdmin, checkAuthStatus } = useAuthStatus();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const intervalId = setInterval(() => {
+        checkAuthStatus();
+      }, 60000); // Check every minute
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isAuthenticated, checkAuthStatus]);
 
   return (
     <div className="min-h-screen bg-gray-100">

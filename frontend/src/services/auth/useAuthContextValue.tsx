@@ -79,5 +79,30 @@ export const useAuthContextValue = (): AuthHook => {
     setAuthStage(AuthStage.UNAUTHENTICATED);
   }, []);
 
-  return { authStage, login, register, logout, activeUser, checkAuth, token };
+  const checkTokenValidity = useCallback(async () => {
+    const client = await genApiClient();
+    try {
+      await client.users_ValidateToken();
+      return true;
+    } catch (error) {
+      if (error.status === 401) {
+        logout();
+        return false;
+      }
+      console.error('Token validation error:', error);
+      return true;
+    }
+  }, [logout]);
+  
+  useEffect(() => {
+    if (authStage === AuthStage.AUTHENTICATED) {
+      const intervalId = setInterval(() => {
+        checkTokenValidity();
+      }, 60000); // Check every minute
+  
+      return () => clearInterval(intervalId);
+    }
+  }, [authStage, checkTokenValidity]);
+
+  return { authStage, login, register, logout, activeUser, checkAuth, token, checkTokenValidity  };
 };

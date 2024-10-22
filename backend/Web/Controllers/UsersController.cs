@@ -41,6 +41,13 @@ namespace Web.Controllers
             return await Mediator.Send(new GetAllUsersQuery());
         }
 
+        [HttpGet("validate-token")]
+        [Authorize]
+        public ActionResult ValidateToken()
+        {
+            return Ok();
+        }
+
         // Other methods...
     }
 }
