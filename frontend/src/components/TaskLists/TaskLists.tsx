@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { FaPlus, FaChevronDown, FaChevronUp, FaTasks } from 'react-icons/fa';
-import FilterTasks from '../FilterTasks/FilterTasks';
+import FilterTasks, { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskList from '../TaskList/TaskList';
 import NewTaskListModal from './NewTaskListModal';
 import { useTaskOperations } from '../../hooks/useTaskOperations';
-import { TaskFilters } from '../../types/task';
+
 
 const TaskLists: React.FC = () => {
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
@@ -72,12 +72,7 @@ const TaskLists: React.FC = () => {
                   {selectedListId === list.id ? <FaChevronUp /> : <FaChevronDown />}
                 </div>
                 <p className="text-sm text-gray-600 mt-2">{list.description}</p>
-                {selectedListId !== list.id && (
-                  <div className="mt-4 flex items-center text-gray-500">
-                    <FaTasks className="mr-2" />
-                    <span>{list.taskCount || 0} tasks</span>
-                  </div>
-                )}
+          
               </div>
               {selectedListId === list.id && (
                 <div className="p-4 border-t border-gray-200 bg-gray-50">
