@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import AuthPage from '../components/Auth/AuthPage';
 import TaskLists from '../components/TaskLists/TaskLists';
@@ -9,12 +9,13 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage: React.FC = () => {
   const { isAuthenticated, isAdmin, checkAuthStatus } = useAuthStatus();
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
       const intervalId = setInterval(() => {
         checkAuthStatus();
-      }, 60000); // Check every minute
+      }, 60000);
 
       return () => clearInterval(intervalId);
     }
@@ -25,9 +26,14 @@ const HomePage: React.FC = () => {
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       {isAuthenticated ? (
         <>
-          <Header />
+          <Header onOpenAdminPanel={() => setIsAdminPanelOpen(true)} />
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            {isAdmin && <AdminPanel />}
+            {isAdmin && (
+              <AdminPanel 
+                isOpen={isAdminPanelOpen}
+                onClose={() => setIsAdminPanelOpen(false)}
+              />
+            )}
             <TaskLists />
           </main>
         </>
