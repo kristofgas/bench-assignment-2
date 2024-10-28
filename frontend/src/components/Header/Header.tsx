@@ -1,14 +1,18 @@
 import React from 'react';
 import { useAuthStatus } from '../../hooks/useAuthStatus';
 import { toast } from 'react-toastify';
-import { FaUserCog } from 'react-icons/fa';
+import { FaUserCog, FaFilter, FaTasks, FaUser } from 'react-icons/fa';
+import FilterTasks from '../FilterTasks/FilterTasks';
+import { TaskFilters } from '../FilterTasks/FilterTasks';
 
 interface HeaderProps {
   onOpenAdminPanel?: () => void;
+  onFilterChange?: (filters: TaskFilters) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel, onFilterChange }) => {
   const { isAuthenticated, logout, activeUser, isAdmin } = useAuthStatus();
+  const [showFilters, setShowFilters] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -16,30 +20,51 @@ const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel }) => {
   };
 
   return (
-    <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Task Management App</h1>
-        {isAuthenticated && activeUser && (
-          <div className="flex items-center space-x-4">
-            {isAdmin && (
-              <button
-                onClick={onOpenAdminPanel}
-                className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 transition-colors"
-              >
-                <FaUserCog />
-                <span>Admin Panel</span>
-              </button>
-            )}
-            <p className="text-gray-600">Welcome, {activeUser.username}!</p>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Logout
-            </button>
+    <header className="bg-white shadow fixed top-0 left-0 right-0 z-[100]">
+      <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <FaTasks className="text-blue-500 text-2xl" />
+            <span className="text-sm text-gray-500">
+              <FaUser className="inline-block mr-1" />
+              {activeUser?.username}
+            </span>
           </div>
-        )}
+          
+          {isAuthenticated && activeUser && (
+            <div className="flex items-center space-x-2">
+              {isAdmin && (
+                <button
+                  onClick={onOpenAdminPanel}
+                  className="text-indigo-500 hover:text-indigo-600 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                  title="Admin Panel"
+                >
+                  <FaUserCog size={20} />
+                </button>
+              )}
+              <button
+                onClick={() => setShowFilters(true)}
+                className="text-gray-500 hover:text-gray-600 p-2 rounded-full hover:bg-gray-50 transition-colors"
+                title="Filters"
+              >
+                <FaFilter size={20} />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-colors"
+                title="Logout"
+              >
+                <span className="text-sm">Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      <FilterTasks
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        onFilterChange={onFilterChange}
+      />
     </header>
   );
 };

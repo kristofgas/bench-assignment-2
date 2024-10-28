@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import AuthPage from '../components/Auth/AuthPage';
 import TaskLists from '../components/TaskLists/TaskLists';
 import Header from '../components/Header/Header';
 import AdminPanel from 'components/AdminPanel/AdminPanel';
 import { ToastContainer } from 'react-toastify';
+import { TaskFilters } from '../components/FilterTasks/FilterTasks';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage: React.FC = () => {
   const { isAuthenticated, isAdmin, checkAuthStatus } = useAuthStatus();
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [filters, setFilters] = useState<TaskFilters>({
+    isCompleted: null,
+    isFavorite: null,
+    sortDescending: false,
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
       const intervalId = setInterval(() => {
         checkAuthStatus();
       }, 60000);
-
       return () => clearInterval(intervalId);
     }
   }, [isAuthenticated, checkAuthStatus]);
@@ -26,7 +31,10 @@ const HomePage: React.FC = () => {
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       {isAuthenticated ? (
         <>
-          <Header onOpenAdminPanel={() => setIsAdminPanelOpen(true)} />
+          <Header 
+            onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
+            onFilterChange={setFilters}
+          />
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {isAdmin && (
               <AdminPanel 
@@ -34,7 +42,7 @@ const HomePage: React.FC = () => {
                 onClose={() => setIsAdminPanelOpen(false)}
               />
             )}
-            <TaskLists />
+            <TaskLists filters={filters} />
           </main>
         </>
       ) : (
