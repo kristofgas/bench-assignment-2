@@ -62,19 +62,22 @@ const TaskLists: React.FC<TaskListsProps> = ({ filters }) => {
                   selectedListId === list.id ? 'col-span-full row-span-2' : ''
                 }`}
               >
-                <div
-                  onClick={() => handleListSelect(list.id)}
-                  className="p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-lg">{list.name}</h3>
-                    {selectedListId === list.id ? <FaChevronUp /> : <FaChevronDown />}
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">{list.description}</p>
-                </div>
-                {selectedListId === list.id && (
-                  <div className="border-t border-gray-200 bg-gray-50">
-                    <TaskList listId={list.id} filters={filters} />
+                {selectedListId === list.id ? (
+  <TaskList 
+    listId={list.id} 
+    filters={filters} 
+    onCollapse={() => handleListSelect(list.id)}
+  />
+                ) : (
+                  <div
+                    onClick={() => handleListSelect(list.id)}
+                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold text-lg">{list.name}</h3>
+                      <FaChevronDown />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">{list.description}</p>
                   </div>
                 )}
               </div>

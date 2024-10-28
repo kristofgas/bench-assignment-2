@@ -8,13 +8,15 @@ import TaskListTasks from './TaskListTasks';
 import TaskListDetails from './TaskListDetails';
 import SelectedTaskDetails from 'components/Task/SelectedTaskDetails';
 import { TaskListContentSkeleton } from 'components/Skeletons/TaskListContentSkeleton';
+import { FaChevronUp } from 'react-icons/fa';
 
 interface TaskListProps {
   listId: number;
   filters: TaskFilters;
+  onCollapse: () => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
+const TaskList: React.FC<TaskListProps> = ({ listId, filters, onCollapse }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const {
     selectedTask,
@@ -58,7 +60,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
 
   return (
     <div className="animate-fadeIn">
-      <Suspense fallback={<TaskListContentSkeleton />}>
+       <Suspense fallback={<TaskListContentSkeleton />}>
         {isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading ? (
           <TaskListContentSkeleton />
         ) : (
@@ -72,6 +74,7 @@ const TaskList: React.FC<TaskListProps> = ({ listId, filters }) => {
               onShare={(selectedUsers) => shareTaskList.mutate(selectedUsers)}
               isSharing={isSharing}
               onAddNewTask={() => setShowNewTaskForm(true)}
+              onCollapse={onCollapse}
             />
             <TaskListTasks
               activeTasks={tasks.filter(task => !task.isCompleted)}

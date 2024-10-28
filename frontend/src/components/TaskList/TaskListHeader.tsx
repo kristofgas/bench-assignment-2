@@ -12,6 +12,7 @@ interface TaskListHeaderProps {
   onShare: (selectedUsers: number[]) => void;
   isSharing: boolean;
   onAddNewTask: () => void;
+  onCollapse: () => void;
 }
 
 const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
@@ -22,7 +23,8 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
   onClearCompletedTasks,
   onShare,
   isSharing,
-  onAddNewTask
+  onAddNewTask,
+  onCollapse
 }) => {
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -105,14 +107,19 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
     <div className="bg-white rounded-t-lg overflow-visible mb-0 shadow-sm">
     <div className="p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <div className="flex-grow w-full sm:w-3/4 pr-4">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">{taskList.name}</h2>
-          {taskList.description && (
-            <p className="text-gray-500 text-sm leading-relaxed break-words">
-              {taskList.description}
-            </p>
-          )}
-        </div>
+      <div className="flex-grow w-full sm:w-3/4 pr-4">
+  <div 
+    onClick={onCollapse}
+    className="cursor-pointer hover:opacity-80 transition-opacity duration-200 inline-block"
+  >
+    <h2 className="text-3xl font-bold text-gray-800 mb-2">{taskList.name}</h2>
+    {taskList.description && (
+      <p className="text-gray-500 text-sm leading-relaxed break-words">
+        {taskList.description}
+      </p>
+    )}
+  </div>
+</div>
         <div className="flex-shrink-0 mt-4 sm:mt-0">
           <div className="relative inline-block" ref={dropdownRef}>
             <button
@@ -123,22 +130,38 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
               <FaShare className="mr-2 inline-block" /> Share
             </button>
             {showShareDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10">
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2">Share with:</h3>
-                  <ul className="max-h-48 overflow-y-auto mb-4">
-                    {memoizedNonAssociatedUsers}
-                  </ul>
-                  <button
-                    onClick={handleShare}
-                    disabled={isSharing || selectedUsers.length === 0}
-                    className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    {isSharing ? 'Sharing...' : 'Share'}
-                  </button>
-                </div>
-              </div>
-            )}
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+    <div className="relative bg-white rounded-lg shadow-xl p-6 m-4 max-w-sm w-full">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Share with:</h3>
+        <button
+          onClick={() => setShowShareDropdown(false)}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="max-h-60 overflow-y-auto mb-4 border border-gray-200 rounded">
+        {memoizedNonAssociatedUsers}
+      </div>
+      <div className="flex justify-end space-x-2">
+        <button
+          onClick={() => setShowShareDropdown(false)}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleShare}
+          disabled={isSharing || selectedUsers.length === 0}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {isSharing ? 'Sharing...' : 'Share'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
           </div>
         </div>
       </div>
