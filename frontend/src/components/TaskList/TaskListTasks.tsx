@@ -19,7 +19,7 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
   };
 
   return (
-    <div className="bg-gray-50 rounded-b-lg overflow-hidden">
+    <div className="h-full overflow-y-auto bg-gray-50 rounded-b-lg">
       <div className="px-6 py-4">
         {activeTasks.map(task => (
           <TaskItem

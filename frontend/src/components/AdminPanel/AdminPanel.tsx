@@ -46,16 +46,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative mx-auto my-8 max-w-6xl bg-white rounded-lg shadow-xl">
-        <div className="absolute top-4 right-4">
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-            aria-label="Close panel"
-          >
-            <FaTimes size={24} />
-          </button>
-        </div>
+  <div className="relative mx-auto my-16 max-w-6xl bg-white rounded-lg shadow-xl"> {/* Changed my-8 to my-16 */}
+    <div className="absolute top-6 right-6"> {/* Changed top-4 right-4 to top-6 right-6 */}
+      <button
+        onClick={onClose}
+        className="text-gray-500 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-100"
+        aria-label="Close panel"
+      >
+        <FaTimes size={24} />
+      </button>
+    </div>
 
         <div className="p-8">
           <div className="flex items-center mb-6">

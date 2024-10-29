@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { FaPlus, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaPlus, FaListUl } from 'react-icons/fa';
 import { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskList from '../TaskList/TaskList';
 import NewTaskListModal from './NewTaskListModal';
@@ -22,76 +22,78 @@ const TaskLists: React.FC<TaskListsProps> = ({ filters }) => {
     });
   }, [createTaskList]);
 
-  const handleListSelect = (listId: number) => {
-    setSelectedListId(listId === selectedListId ? null : listId);
-  };
-
   if (taskListsError) return <div className="text-red-500">Error: {taskListsError.toString()}</div>;
 
   return (
-    <div className="relative pt-[52px] sm:pt-[48px]">
-      <div className="fixed left-0 right-0 top-[60px] sm:top-[56px] z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setShowNewListForm(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200 flex items-center shadow-lg"
-            >
-              <FaPlus className="mr-2" /> New List
-            </button>
-          </div>
+    <div className="flex h-[calc(100vh-5rem)] mt-16"> {/* Changed from pt-4 to mt-6 and adjusted height */}
+      {/* Sidebar */}
+      <div className="w-64 md:w-72 shrink-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 mx-4">
+        <div className="p-4 border-b border-gray-200">
+          <button
+            onClick={() => setShowNewListForm(true)}
+            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center"
+          >
+            <FaPlus className="mr-2" /> New List
+          </button>
+        </div>
+        
+        <div className="overflow-y-auto flex-1">
+          {isTaskListsLoading ? (
+            <div className="p-4 space-y-4">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="h-12 bg-gray-100 rounded-lg"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-2">
+              {taskLists?.map(list => (
+                <button
+                  key={list.id}
+                  onClick={() => setSelectedListId(list.id)}
+                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors duration-200 flex items-center ${
+                    selectedListId === list.id
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <FaListUl className={`mr-3 ${
+                    selectedListId === list.id ? 'text-blue-500' : 'text-gray-400'
+                  }`} />
+                  <span className="font-medium truncate">{list.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-        {isTaskListsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {taskLists?.map(list => (
-              <div
-                key={`${list.id}-${list.name}`}
-                className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out ${
-                  selectedListId === list.id ? 'col-span-full row-span-2' : ''
-                }`}
-              >
-                {selectedListId === list.id ? (
-  <TaskList 
-    listId={list.id} 
-    filters={filters} 
-    onCollapse={() => handleListSelect(list.id)}
-  />
-                ) : (
-                  <div
-                    onClick={() => handleListSelect(list.id)}
-                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold text-lg">{list.name}</h3>
-                      <FaChevronDown />
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">{list.description}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {showNewListForm && (
-          <NewTaskListModal
-            onClose={() => setShowNewListForm(false)}
-            onSubmit={handleNewListSubmit}
+      {/* Main Content */}
+      <div className="flex-1 bg-gray-50 mr-4 rounded-lg overflow-hidden"> {/* Added margin and rounded corners */}
+        {selectedListId ? (
+          <TaskList
+            listId={selectedListId}
+            filters={filters}
+            onCollapse={() => setSelectedListId(null)}
           />
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-500">
+            <div className="text-center">
+              <FaListUl size={48} className="mx-auto mb-4 text-gray-300" />
+              <h3 className="text-xl font-medium mb-2">No Task List Selected</h3>
+              <p>Select a task list from the sidebar or create a new one</p>
+            </div>
+          </div>
         )}
       </div>
+
+      {showNewListForm && (
+        <NewTaskListModal
+          onClose={() => setShowNewListForm(false)}
+          onSubmit={handleNewListSubmit}
+        />
+      )}
     </div>
   );
 };
