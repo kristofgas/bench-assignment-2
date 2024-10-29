@@ -1,15 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { FaPlus, FaListUl } from 'react-icons/fa';
-import { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskList from '../TaskList/TaskList';
 import NewTaskListModal from './NewTaskListModal';
 import { useTaskOperations } from '../../hooks/useTaskOperations';
 
 interface TaskListsProps {
-  filters: TaskFilters;
 }
 
-const TaskLists: React.FC<TaskListsProps> = ({ filters }) => {
+const TaskLists: React.FC<TaskListsProps> = () => {
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
   const [showNewListForm, setShowNewListForm] = useState(false);
   const { taskLists, isTaskListsLoading, taskListsError, createTaskList } = useTaskOperations();
@@ -74,7 +72,6 @@ const TaskLists: React.FC<TaskListsProps> = ({ filters }) => {
         {selectedListId ? (
           <TaskList
             listId={selectedListId}
-            filters={filters}
             onCollapse={() => setSelectedListId(null)}
           />
         ) : (

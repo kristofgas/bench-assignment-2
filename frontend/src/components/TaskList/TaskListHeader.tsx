@@ -30,18 +30,18 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setShowShareDropdown(false);
+    }
+  }, []);
+  
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowShareDropdown(false);
-      }
-    };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
   const handleShare = useCallback(() => {
     onShare(selectedUsers);
@@ -86,7 +86,7 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
         </button>
       </div>
     );
-  }, [associatedUsers, showShareDropdown]);
+  }, [associatedUsers, showShareDropdown, setShowShareDropdown]);
 
   const memoizedNonAssociatedUsers = useMemo(() => {
     return nonAssociatedUsers?.map((user) => (

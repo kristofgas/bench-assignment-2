@@ -1,33 +1,22 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { useFilters } from '../../providers/FiltersProvider';
+import { TaskFilters } from 'types/filters';
 
 interface FilterTasksProps {
   isOpen: boolean;
   onClose: () => void;
-  onFilterChange: (filters: TaskFilters) => void;
 }
 
-export interface TaskFilters {
-  isCompleted: boolean | null;
-  isFavorite: boolean | null;
-  sortBy?: 'title' | 'rank';
-  sortDescending: boolean;
-}
 
-const FilterTasks: React.FC<FilterTasksProps> = ({ isOpen, onClose, onFilterChange }) => {
-  const [filters, setFilters] = useState<TaskFilters>({
-    isCompleted: null,
-    isFavorite: null,
-    sortDescending: false,
-  });
 
-  const handleFilterChange = useCallback((key: keyof TaskFilters, value: TaskFilters[keyof TaskFilters]) => {
-    setFilters(prevFilters => {
-      const newFilters = { ...prevFilters, [key]: value };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
-  }, [onFilterChange]);
+const FilterTasks: React.FC<FilterTasksProps> = ({ isOpen, onClose }) => {
+  const { filters, setFilters } = useFilters();
+
+  const handleFilterChange = (key: keyof TaskFilters, value: TaskFilters[keyof TaskFilters]) => {
+    setFilters({ ...filters, [key]: value });
+  };
+
 
   if (!isOpen) return null;
 

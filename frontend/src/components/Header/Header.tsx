@@ -3,14 +3,12 @@ import { useAuthStatus } from '../../hooks/useAuthStatus';
 import { toast } from 'react-toastify';
 import { FaUserCog, FaFilter, FaTasks, FaUser } from 'react-icons/fa';
 import FilterTasks from '../FilterTasks/FilterTasks';
-import { TaskFilters } from '../FilterTasks/FilterTasks';
 
 interface HeaderProps {
   onOpenAdminPanel?: () => void;
-  onFilterChange?: (filters: TaskFilters) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel, onFilterChange }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel}) => {
   const { isAuthenticated, logout, activeUser, isAdmin } = useAuthStatus();
   const [showFilters, setShowFilters] = React.useState(false);
 
@@ -61,10 +59,9 @@ const Header: React.FC<HeaderProps> = ({ onOpenAdminPanel, onFilterChange }) => 
         </div>
       </div>
       <FilterTasks
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
-        onFilterChange={onFilterChange}
-      />
+      isOpen={showFilters}
+      onClose={() => setShowFilters(false)}
+    />
     </header>
   );
 };

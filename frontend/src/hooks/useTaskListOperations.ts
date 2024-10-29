@@ -2,12 +2,12 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Task, NewTask, UpdateTaskDetails, TaskList } from '../types/task';
 import { Color, getRankValue } from '../utils/taskUtils';
-import { TaskFilters } from 'components/FilterTasks/FilterTasks';
 import { TaskDto, TaskListDto, TaskSummaryDto, UserDto } from '../services/backend/types';
 import { useState, useEffect } from 'react';
 import { useSignalRConnection } from '../providers/SignalRProvider';
 import { useSignalREvent } from './useSignalREvent';
 import { useQueryInvalidation } from './useQueryInvalidation';
+import { TaskFilters } from 'types/filters';
 
 export function useTaskListOperations(listId: number, filters: TaskFilters) {
   const { apiCall } = useApi();

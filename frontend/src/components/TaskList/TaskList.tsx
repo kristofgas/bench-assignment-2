@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useTaskListOperations } from '../../hooks/useTaskListOperations';
 import { useTaskSelection } from '../../hooks/useTaskSelection';
-import { TaskFilters } from '../FilterTasks/FilterTasks';
 import TaskListHeader from './TaskListHeader';
 import TaskForm from '../Task/TaskForm';
 import TaskListTasks from './TaskListTasks';
@@ -9,14 +8,15 @@ import TaskListDetails from './TaskListDetails';
 import SelectedTaskDetails from 'components/Task/SelectedTaskDetails';
 import { TaskListContentSkeleton } from 'components/Skeletons/TaskListContentSkeleton';
 import { FaChevronUp } from 'react-icons/fa';
+import { useFilters } from 'providers/FiltersProvider';
 
 interface TaskListProps {
   listId: number;
-  filters: TaskFilters;
   onCollapse: () => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ listId, filters, onCollapse }) => {
+const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
+  const { filters } = useFilters();
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const {
     selectedTask,

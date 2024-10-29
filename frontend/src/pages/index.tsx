@@ -5,17 +5,11 @@ import TaskLists from '../components/TaskLists/TaskLists';
 import Header from '../components/Header/Header';
 import AdminPanel from 'components/AdminPanel/AdminPanel';
 import { ToastContainer } from 'react-toastify';
-import { TaskFilters } from '../components/FilterTasks/FilterTasks';
 import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage: React.FC = () => {
   const { isAuthenticated, isAdmin, checkAuthStatus } = useAuthStatus();
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
-  const [filters, setFilters] = useState<TaskFilters>({
-    isCompleted: null,
-    isFavorite: null,
-    sortDescending: false,
-  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,7 +27,6 @@ const HomePage: React.FC = () => {
         <>
           <Header 
             onOpenAdminPanel={() => setIsAdminPanelOpen(true)}
-            onFilterChange={setFilters}
           />
           <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {isAdmin && (
@@ -42,7 +35,7 @@ const HomePage: React.FC = () => {
                 onClose={() => setIsAdminPanelOpen(false)}
               />
             )}
-            <TaskLists filters={filters} />
+            <TaskLists/>
           </main>
         </>
       ) : (

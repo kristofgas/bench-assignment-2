@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SignalRProvider } from '../providers/SignalRProvider';
 import '../styles/global.css';
 import 'react-toastify/dist/ReactToastify.css';
+import { FiltersProvider } from "providers/FiltersProvider";
 
 
 export function reportWebVitals(metric: NextWebVitalsMetric): void {
@@ -42,7 +43,9 @@ const MyApp = ({ Component, pageProps, __N_SSG }: AppProps): ReactElement => {
       <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
           <SignalRProvider>
+            <FiltersProvider>
             <Component {...pageProps} />
+            </FiltersProvider>
           </SignalRProvider>
       </AuthContextProvider>
     </QueryClientProvider>
