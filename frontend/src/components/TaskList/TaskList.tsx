@@ -15,8 +15,7 @@ interface TaskListProps {
   onCollapse: () => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
-  const { filters } = useFilters();
+const TaskList: React.FC<TaskListProps> = ({ listId, onCollapse }) => {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const {
     selectedTask,
@@ -28,16 +27,11 @@ const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
     handleTaskUpdate,
   } = useTaskSelection();
 
+  // Only keep non-task related operations
   const {
     taskList,
     isTaskListLoading,
     taskListError,
-    tasks,
-    isTasksLoading,
-    tasksError,
-    createTask,
-    updateTaskStatus,
-    updateTaskDetails,
     shareTaskList,
     associatedUsers,
     nonAssociatedUsers,
@@ -48,20 +42,22 @@ const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
     nonAssociatedUsersError,
     taskSummary,
     clearCompletedTasks,
-  } = useTaskListOperations(listId, filters);
+    createTask,
+    updateTaskDetails,
+  } = useTaskListOperations(listId); // Remove filters parameter
 
   useEffect(() => {
     setSelectedTask(null);
   }, [listId, setSelectedTask]);
 
-  if (taskListError || tasksError || associatedUsersError || nonAssociatedUsersError) {
-    return <div className="text-red-500">Error: {(taskListError || tasksError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
+  if (taskListError || associatedUsersError || nonAssociatedUsersError) {
+    return <div className="text-red-500">Error: {(taskListError || associatedUsersError || nonAssociatedUsersError)?.toString()}</div>;
   }
 
   return (
     <div className="animate-fadeIn h-full flex flex-col">
       <Suspense fallback={<TaskListContentSkeleton />}>
-        {isTaskListLoading || isTasksLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading ? (
+        {isTaskListLoading || isAssociatedUsersLoading || isNonAssociatedUsersLoading ? (
           <TaskListContentSkeleton />
         ) : (
           <div className="flex flex-col h-full">
@@ -76,11 +72,9 @@ const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
               onAddNewTask={() => setShowNewTaskForm(true)}
               onCollapse={onCollapse}
             />
-            <div className="flex-1 overflow-hidden"> {/* Added wrapper for scroll container */}
+            <div className="flex-1 overflow-hidden">
               <TaskListTasks
-                activeTasks={tasks.filter(task => !task.isCompleted)}
-                completedTasks={tasks.filter(task => task.isCompleted)}
-                onStatusChange={(taskId) => updateTaskStatus.mutate(taskId)}
+                listId={listId}
                 onEdit={handleTaskEdit}
                 onSelect={(task) => handleTaskSelectHook(task, setSelectedTask)}
               />
@@ -113,10 +107,6 @@ const TaskList: React.FC<TaskListProps> = ({ listId,  onCollapse }) => {
         onUpdate={(updatedTask) => handleTaskUpdate(updateTaskDetails, updatedTask, setEditingTask, setSelectedTask)}
       />
     </div>
-
-
-
-
   );
 };
 export default TaskList;

@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Task } from '../../types/task';
 import TaskItem from 'components/Task/TaskItem';
+import { useFilters } from '../../providers/FiltersProvider';
+import { useTasksData } from '../../hooks/useTasksData';
+import { TaskListContentSkeleton } from 'components/Skeletons/TaskListContentSkeleton';
 
 interface TaskListTasksProps {
-  activeTasks: Task[];
-  completedTasks: Task[];
-  onStatusChange: (taskId: number) => void;
+  listId: number;
   onEdit: (task: Task) => void;
   onSelect: (task: Task) => void;
 }
 
-const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTasks, onStatusChange, onEdit, onSelect }) => {
+const TaskListTasks = memo<TaskListTasksProps>(({ listId, onEdit, onSelect }) => {
+  const { filters } = useFilters();
+  const { tasks, isTasksLoading, updateTaskStatus } = useTasksData(listId, filters);
   const [showCompleted, setShowCompleted] = useState(false);
   const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
 
   const handleTaskExpand = (taskId: number) => {
     setExpandedTaskId(expandedTaskId === taskId ? null : taskId);
   };
+
+  if (isTasksLoading) return <TaskListContentSkeleton />;
+
+  const activeTasks = tasks.filter(task => !task.isCompleted);
+  const completedTasks = tasks.filter(task => task.isCompleted);
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50 rounded-b-lg">
@@ -25,7 +33,7 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
           <TaskItem
             key={task.id}
             task={task}
-            onStatusChange={() => onStatusChange(task.id)}
+            onStatusChange={() => updateTaskStatus.mutate(task.id)}
             onEdit={() => onEdit(task)}
             onSelect={() => onSelect(task)}
             isExpanded={expandedTaskId === task.id}
@@ -47,7 +55,7 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
                 <TaskItem
                   key={task.id}
                   task={task}
-                  onStatusChange={() => onStatusChange(task.id)}
+                  onStatusChange={() => updateTaskStatus.mutate(task.id)}
                   onEdit={() => onEdit(task)}
                   onSelect={() => onSelect(task)}
                   isExpanded={expandedTaskId === task.id}
@@ -60,6 +68,6 @@ const TaskListTasks: React.FC<TaskListTasksProps> = ({ activeTasks, completedTas
       )}
     </div>
   );
-};
+});
 
 export default TaskListTasks;
