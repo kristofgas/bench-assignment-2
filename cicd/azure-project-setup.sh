@@ -5,7 +5,7 @@ AZURESUBSCRIPTIONID="4ea17de3-cb5d-4e10-bc30-12b88a4957bd"
 AKSNAME='cphdeliveryinternalk8sAKS'
 AKSURL='https://kubernetes.default.svc'
 AKSRESOURCEGROUP='cph-delivery-internal-k8s'
-RESOURCEGROUPLOCATION='westeurope'
+RESOURCEGROUPLOCATION='northeurope'
 
 #CHANGE THIS
 REPONAME='REPONAMEHERE'
