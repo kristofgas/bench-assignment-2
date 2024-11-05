@@ -202,5 +202,5 @@ const TaskListHeader: React.FC<TaskListHeaderProps> = React.memo(({
   </div>
 );
 });
-
+TaskListHeader.displayName = 'TaskListHeader';
 export default TaskListHeader;

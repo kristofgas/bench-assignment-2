@@ -35,4 +35,5 @@ const FilteredTasksContainer = memo(({
   );
 });
 
+FilteredTasksContainer.displayName = 'FilteredTasksContainer';
 export default FilteredTasksContainer;

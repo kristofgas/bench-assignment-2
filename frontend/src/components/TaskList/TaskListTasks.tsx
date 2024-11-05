@@ -70,4 +70,5 @@ const TaskListTasks = memo<TaskListTasksProps>(({ listId, onEdit, onSelect }) =>
   );
 });
 
+TaskListTasks.displayName = 'TaskListTasks';
 export default TaskListTasks;
