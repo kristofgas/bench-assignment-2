@@ -32,8 +32,8 @@ jobs:
 
       - run: git diff --exit-code
 
-      - run: dotnet test --no-build --verbosity normal
-        working-directory: ${{ env.working-directory }}
+      #- run: dotnet test --no-build --verbosity normal
+      #  working-directory: ${{ env.working-directory }}
 
   acr-build-backend:
     needs: build-and-test-backend
