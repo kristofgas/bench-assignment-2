@@ -18,7 +18,7 @@ jobs:
     - name: Build Backend
       run: |
         cd backend
-        dotnet publish -c Release
+        dotnet publish Web/Web.csproj -c Release
 
     - name: Deploy Backend
       uses: azure/webapps-deploy@v2

@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <BuildInRelease>false</BuildInRelease>
 
     <Configurations>Debug;Release;NSwag</Configurations>
   </PropertyGroup>
