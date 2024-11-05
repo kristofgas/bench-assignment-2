@@ -2,8 +2,9 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useApi } from './useApi';
 import { Task, NewTask, UpdateTaskDetails } from '../types/task';
 import { TaskDto } from '../services/backend/types';
-import { TaskFilters } from '../FilterTasks/FilterTasks';
+
 import { Color, getRankValue } from '../utils/taskUtils';
+import { TaskFilters } from 'types/filters';
 
 export function useTasksData(listId: number, filters: TaskFilters) {
   const { apiCall } = useApi();
