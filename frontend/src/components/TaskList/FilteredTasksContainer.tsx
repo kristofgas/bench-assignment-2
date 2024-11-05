@@ -1,8 +1,10 @@
 // New component: FilteredTasksContainer.tsx
+/*
 import React, { memo } from 'react';
 import { Task } from '../../types/task';
 import TaskListTasks from './TaskListTasks';
-import { TaskFilters } from '../FilterTasks/FilterTasks';
+import { TaskFilters } from 'types/filters';
+
 
 interface FilteredTasksContainerProps {
   tasks: Task[];
@@ -37,3 +39,4 @@ const FilteredTasksContainer = memo(({
 
 FilteredTasksContainer.displayName = 'FilteredTasksContainer';
 export default FilteredTasksContainer;
+*/
