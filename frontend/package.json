@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start -p ${PORT:-8080}",
     "start:pm2": "pm2 start npm --name \"nextjs\" --interpreter bash  -- start",
     "lint": "next lint --fix"
   },
