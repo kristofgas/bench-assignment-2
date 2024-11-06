@@ -64,8 +64,9 @@ az webapp config appsettings set \
     --resource-group $RESOURCE_GROUP \
     --name $BACKEND_APP \
     --settings \
-    "ConnectionStrings__DefaultConnection=Server=tcp:$SQL_SERVER.database.windows.net;Database=$SQL_DB;User ID=$SQL_ADMIN;Password=$SQL_PASSWORD;Encrypt=true;" \
+    "ConnectionStrings__DefaultConnection=Server=tcp:$SQL_SERVER.database.windows.net;Database=$SQL_DB;User ID=$SQL_ADMIN;Password=$SQL_PASSWORD;Encrypt=true;TrustServerCertificate=true;" \
     "AllowedOrigins__0=https://$FRONTEND_APP.azurewebsites.net"
+    
 # Configure Frontend Settings
 az webapp config appsettings set \
     --resource-group $RESOURCE_GROUP \
