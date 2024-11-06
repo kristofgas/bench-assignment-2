@@ -1,37 +1,30 @@
-# install
-FROM node:20 as base
-WORKDIR /usr/src/app
+FROM node:18-alpine AS base
+WORKDIR /app
 
+# Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
+# Copy source
 COPY . .
 
-# build
-FROM base as build
-WORKDIR /usr/src/app
-
+# Build
 RUN npm run build
 
+# Production image
+FROM node:18-alpine AS production
+WORKDIR /app
 
-# production
-FROM node:20-alpine
-WORKDIR /usr/src/app
+# Copy built assets
+COPY --from=base /app/package*.json ./
+COPY --from=base /app/.next ./.next
+COPY --from=base /app/public ./public
+COPY --from=base /app/next.config.js ./
 
-ENV NODE_ENV production
+# Install production dependencies
+RUN npm ci --only=production
 
-COPY package*.json ./
+ENV PORT=8080
+EXPOSE 8080
 
-RUN npm install --only=production
-
-COPY --from=build /usr/src/app/.next ./.next
-COPY --from=build /usr/src/app/config ./config
-COPY --from=build /usr/src/app/public ./public
-COPY --from=build /usr/src/app/src/i18n ./src/i18n
-COPY --from=build /usr/src/app/next.config.js ./next.config.js
-# COPY --from=build /usr/src/app/server.js ./server.js
-
-EXPOSE 3000
-ENV PORT 3000
-
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
