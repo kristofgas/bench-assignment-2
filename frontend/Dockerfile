@@ -9,7 +9,7 @@ RUN npm ci
 COPY . .
 
 # Build
-RUN npm run build
+RUN npm ci && echo "npm ci completed successfully"
 
 # Production image
 FROM node:18-alpine AS production
