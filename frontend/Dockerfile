@@ -15,14 +15,12 @@ RUN npm run build
 FROM node:18-alpine AS production
 WORKDIR /app
 
-# Copy built assets
+# Copy built assets and node_modules
 COPY --from=base /app/package*.json ./
 COPY --from=base /app/.next ./.next
 COPY --from=base /app/public ./public
 COPY --from=base /app/next.config.js ./
-
-# Install production dependencies
-RUN npm ci --only=production
+COPY --from=base /app/node_modules ./node_modules
 
 ENV PORT=3000
 EXPOSE 3000
