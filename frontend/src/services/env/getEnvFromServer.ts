@@ -1,3 +1,3 @@
 export const getEnvFromServer = () => ({
-    backendUrl: process.env.backendurl
+    backendUrl: process.env.NEXT_PUBLIC_API_URL
 })

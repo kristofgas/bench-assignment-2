@@ -18,7 +18,7 @@ jobs:
     - name: Build Backend
       run: |
         cd backend
-        dotnet publish Web/Web.csproj -c Release
+        dotnet publish -c Release
 
     - name: Deploy Backend
       uses: azure/webapps-deploy@v2
@@ -40,14 +40,8 @@ jobs:
     - name: Build Frontend
       run: |
         cd frontend
-        npm ci
+        npm install
         npm run build
-
-    - name: Prepare for deployment
-      run: |
-        cd frontend
-        rm -rf node_modules
-        npm ci --only=production
         
     - name: Deploy Frontend
       uses: azure/webapps-deploy@v2
