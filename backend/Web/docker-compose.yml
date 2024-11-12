@@ -1,3 +1,4 @@
+
 version: '3.8'
 
 services:
@@ -10,6 +11,12 @@ services:
       - "1433:1433"
     volumes:
       - sqlserverdata:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "MyStr0ngPassword!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   web:
     build:
@@ -20,9 +27,10 @@ services:
       - "443:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=myDataBase;User Id=sa;Password=MyStr0ngPassword!;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=myDataBase;User Id=sa;Password=MyStr0ngPassword!;TrustServerCertificate=true;MultipleActiveResultSets=true
     depends_on:
-      - db
-
+      db:
+        condition: service_healthy
+    restart: on-failure:5
 volumes:
   sqlserverdata:

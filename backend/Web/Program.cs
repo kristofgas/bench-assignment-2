@@ -170,6 +170,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(); // Add this line
         await dbContext.SeedRolesAsync();
     }
 
