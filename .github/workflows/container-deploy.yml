@@ -87,6 +87,11 @@ jobs:
             --docker-registry-server-user ${{ secrets.REGISTRY_USERNAME }} \
             --docker-registry-server-password ${{ secrets.REGISTRY_PASSWORD }}
 
+          az webapp config appsettings set \
+            --name ${{ env.BACKEND_APP }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --settings AllowedOrigins__0=https://bench-assignment-2-web.azurewebsites.net
+
       # Update Frontend App Service
       - name: Configure Frontend Container
         run: |
