@@ -77,6 +77,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY_NAME }}.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
       # Build and Push Frontend
       - name: Build & Push Frontend
         uses: docker/build-push-action@v4
