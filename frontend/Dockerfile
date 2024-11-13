@@ -8,8 +8,8 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Build
-RUN npm ci && echo "npm ci completed successfully"
+# Build the Next.js application
+RUN npm run build
 
 # Production image
 FROM node:18-alpine AS production
@@ -20,6 +20,7 @@ COPY --from=base /app/package*.json ./
 COPY --from=base /app/.next ./.next
 COPY --from=base /app/public ./public
 COPY --from=base /app/next.config.js ./
+COPY --from=base /app/config ./config
 COPY --from=base /app/node_modules ./node_modules
 
 ENV PORT=8080
