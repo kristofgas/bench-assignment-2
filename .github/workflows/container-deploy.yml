@@ -43,7 +43,7 @@ jobs:
       - name: Build & Push Backend
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/Web
+          context: ./backend
           file: ./backend/Web/Dockerfile
           push: true
           tags: |
