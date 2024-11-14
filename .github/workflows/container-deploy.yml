@@ -90,7 +90,12 @@ jobs:
           az webapp config appsettings set \
             --name ${{ env.BACKEND_APP }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --settings AllowedOrigins__0=https://bench-assignment-2-web.azurewebsites.net
+            --settings \
+              AllowedOrigins__0=https://bench-assignment-2-web.azurewebsites.net \
+              AllowedOrigins__1=http://localhost:3000 \
+              AllowedOrigins__2=http://localhost:8080
+          
+          az webapp restart --name ${{ env.BACKEND_APP }} --resource-group ${{ env.RESOURCE_GROUP }}
 
       # Update Frontend App Service
       - name: Configure Frontend Container
